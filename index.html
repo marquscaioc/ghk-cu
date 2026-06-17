@@ -380,6 +380,14 @@
       background: radial-gradient(circle, rgba(26,58,90,0.12) 0%, transparent 70%);
       pointer-events: none;
     }
+    #heroParticles {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
     .hero__content { position: relative; z-index: 1; }
     .hero__eyebrow {
       display: inline-flex;
@@ -1535,6 +1543,7 @@
   <section class="section" style="padding-top:0">
     <div class="container">
       <div class="hero">
+        <canvas id="heroParticles" aria-hidden="true"></canvas>
         <div class="hero__content">
           <div class="hero__eyebrow">
             <div class="hero__eyebrow-dot"></div>
@@ -2256,6 +2265,77 @@
         });
       });
     }
+
+    // Hero particle system (desktop + reduced-motion check)
+    (function() {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced || window.innerWidth < 768) return;
+
+      const canvas = document.getElementById('heroParticles');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const PARTICLE_COUNT = 35;
+      let particles = [];
+      let animId;
+
+      function resize() {
+        const hero = canvas.parentElement;
+        canvas.width = hero.offsetWidth;
+        canvas.height = hero.offsetHeight;
+      }
+
+      function randomParticle(forceY) {
+        return {
+          x: Math.random() * canvas.width,
+          y: forceY !== undefined ? forceY : Math.random() * canvas.height,
+          r: 1 + Math.random() * 2,
+          alpha: 0.2 + Math.random() * 0.4,
+          speedY: 0.2 + Math.random() * 0.3,
+          phase: Math.random() * Math.PI * 2,
+          freq: 0.003 + Math.random() * 0.004
+        };
+      }
+
+      function initParticles() {
+        particles = Array.from({ length: PARTICLE_COUNT }, () => randomParticle());
+      }
+
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        frame++;
+        particles.forEach(p => {
+          p.y -= p.speedY;
+          p.x += Math.sin(p.phase + frame * p.freq) * 0.4;
+          if (p.y < -p.r * 2) {
+            const fresh = randomParticle(canvas.height + p.r);
+            Object.assign(p, fresh);
+          }
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(201,148,100,${p.alpha})`;
+          ctx.fill();
+        });
+        animId = requestAnimationFrame(draw);
+      }
+
+      const ro = new ResizeObserver(() => { resize(); });
+      ro.observe(canvas.parentElement);
+      resize();
+      initParticles();
+      draw();
+
+      // Stop animation when hero leaves viewport for performance
+      const heroObs = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          if (!animId) { draw(); }
+        } else {
+          cancelAnimationFrame(animId);
+          animId = null;
+        }
+      }, { threshold: 0 });
+      heroObs.observe(canvas.parentElement);
+    })();
   </script>
 </body>
 </html>
