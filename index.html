@@ -174,6 +174,7 @@
   }
   </script>
 
+  <link rel="preload" as="image" href="vial.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -431,6 +432,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 440px;
+      height: 480px;
     }
     .hero__product-glow {
       position: absolute;
@@ -457,16 +460,17 @@
     }
     .hero__badge {
       position: absolute;
-      bottom: 32px;
-      left: -24px;
+      bottom: 80px;
+      left: -28px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px 20px;
+      padding: 14px 18px;
       display: flex;
       align-items: center;
       gap: 12px;
       backdrop-filter: blur(20px);
+      z-index: 2;
     }
     .hero__badge-icon {
       width: 40px;
@@ -483,13 +487,14 @@
     .hero__badge-label { color: var(--text-muted); font-size: 0.72rem; margin-top: 2px; }
     .hero__badge2 {
       position: absolute;
-      top: 32px;
-      right: -24px;
+      top: 80px;
+      right: -28px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 14px 18px;
       backdrop-filter: blur(20px);
+      z-index: 2;
     }
     .hero__stars { color: var(--copper); font-size: 0.9rem; }
     .hero__rating-text { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
@@ -768,6 +773,23 @@
       display: grid;
       grid-template-columns: repeat(3,1fr);
       gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .testimonials__grid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 16px;
+        padding-bottom: 16px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .testimonials__grid::-webkit-scrollbar { display: none; }
+      .testimonial-card {
+        min-width: 85vw;
+        scroll-snap-align: start;
+        flex-shrink: 0;
+      }
     }
     .testimonial-card {
       background: var(--surface);
@@ -1058,6 +1080,159 @@
     }
 
     /* ── RESPONSIVE ─────────────────────────────────────────────── */
+    /* ── TIMELINE ───────────────────────────────────────────────── */
+    .timeline { background: var(--bg2); }
+    .timeline__header { text-align: center; margin-bottom: 72px; }
+    .timeline__title { font-size: clamp(2.4rem,4vw,3.6rem); color: var(--white); }
+    .timeline__sub { font-size: 1.05rem; color: var(--text-dim); max-width: 520px; margin: 20px auto 0; }
+    .timeline__track {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 0;
+    }
+    .timeline__track::before {
+      content: '';
+      position: absolute;
+      top: 28px; left: 12.5%; right: 12.5%;
+      height: 1px;
+      background: linear-gradient(90deg, var(--copper), rgba(201,148,100,0.3), var(--copper));
+    }
+    .timeline__item { text-align: center; padding: 0 16px; }
+    .timeline__dot {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      position: relative; z-index: 1;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      color: var(--copper);
+      transition: var(--transition);
+    }
+    .timeline__item:hover .timeline__dot {
+      background: var(--copper);
+      color: #1A0E06;
+      border-color: var(--copper);
+      box-shadow: 0 0 24px rgba(201,148,100,0.4);
+    }
+    .timeline__week {
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--copper); margin-bottom: 10px;
+    }
+    .timeline__result {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem; color: var(--white);
+      margin-bottom: 8px;
+    }
+    .timeline__desc { font-size: 0.82rem; color: var(--text-dim); line-height: 1.7; }
+
+    /* ── FOR WHOM ────────────────────────────────────────────────── */
+    .forwhom__header { text-align: center; margin-bottom: 64px; }
+    .forwhom__title { font-size: clamp(2.4rem,4vw,3.6rem); color: var(--white); }
+    .forwhom__grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 20px;
+    }
+    .forwhom-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      text-align: center;
+      transition: var(--transition);
+      cursor: default;
+    }
+    .forwhom-card:hover {
+      border-color: rgba(201,148,100,0.4);
+      transform: translateY(-4px);
+      background: var(--surface);
+    }
+    .forwhom-card__icon {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      display: block;
+    }
+    .forwhom-card__title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; color: var(--white);
+      margin-bottom: 10px;
+    }
+    .forwhom-card__desc { font-size: 0.84rem; color: var(--text-dim); line-height: 1.7; }
+
+    /* ── PROTOCOL ────────────────────────────────────────────────── */
+    .protocol { background: var(--bg2); }
+    .protocol__inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 100px;
+      align-items: center;
+    }
+    .protocol__steps { display: flex; flex-direction: column; gap: 32px; }
+    .protocol__step {
+      display: flex; gap: 20px; align-items: flex-start;
+      padding: 24px; border-radius: var(--radius);
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+    .protocol__step:hover {
+      border-color: var(--border);
+      background: var(--surface);
+    }
+    .protocol__num {
+      flex-shrink: 0;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--copper), var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; color: #1A0E06; font-weight: 600;
+    }
+    .protocol__step-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; color: var(--white);
+      margin-bottom: 6px;
+    }
+    .protocol__step-desc { font-size: 0.86rem; color: var(--text-dim); line-height: 1.75; }
+    .protocol__visual {
+      display: flex; justify-content: center; align-items: center;
+      position: relative;
+    }
+    .protocol__visual::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 360px; height: 360px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,148,100,0.1) 0%, transparent 65%);
+    }
+    .protocol__img {
+      width: 180px;
+      position: relative; z-index: 1;
+      filter: drop-shadow(0 16px 40px rgba(201,148,100,0.28));
+    }
+
+    /* ── COUNTER ANIMATION ───────────────────────────────────────── */
+    .stat-item__num[data-target] { transition: none; }
+
+    @media (max-width: 1024px) {
+      .timeline__track { grid-template-columns: repeat(2,1fr); gap: 40px; }
+      .timeline__track::before { display: none; }
+      .forwhom__grid { grid-template-columns: repeat(2,1fr); }
+      .protocol__inner { grid-template-columns: 1fr; }
+      .protocol__visual { display: none; }
+    }
+    @media (max-width: 640px) {
+      .timeline__track { grid-template-columns: 1fr 1fr; gap: 28px; }
+      .forwhom__grid { grid-template-columns: repeat(2,1fr); gap: 14px; }
+      .forwhom-card { padding: 24px 16px; }
+    }
+
     /* ── MARQUEE ────────────────────────────────────────────────── */
     .marquee {
       overflow: hidden;
@@ -1269,6 +1444,7 @@
         <li><a href="#ingredientes">Ingredientes</a></li>
         <li><a href="#beneficios">Benefícios</a></li>
         <li><a href="#como-funciona">Como Funciona</a></li>
+        <li><a href="#protocolo">Protocolo</a></li>
         <li><a href="#depoimentos">Depoimentos</a></li>
         <li><a href="#faq">FAQ</a></li>
       </ul>
@@ -1461,21 +1637,53 @@
     </div>
   </section>
 
+  <!-- FOR WHOM -->
+  <section class="section" style="background:var(--bg)">
+    <div class="container">
+      <div class="forwhom__header reveal">
+        <div class="line"><span class="label">Indicações</span></div>
+        <h2 class="forwhom__title">Para Quem É o GHK·CU?</h2>
+      </div>
+      <div class="forwhom__grid">
+        <div class="forwhom-card reveal reveal-delay-1">
+          <span class="forwhom-card__icon">✦</span>
+          <h3 class="forwhom-card__title">Pele Madura</h3>
+          <p class="forwhom-card__desc">Para quem busca reverter os sinais do envelhecimento com um ativo comprovado — firmeza, elasticidade e luminosidade renovadas.</p>
+        </div>
+        <div class="forwhom-card reveal reveal-delay-2">
+          <span class="forwhom-card__icon">◈</span>
+          <h3 class="forwhom-card__title">Pós-Procedimento</h3>
+          <p class="forwhom-card__desc">Ideal para protocolos de microagulhamento, laser e bioestimulação. Acelera o reparo e potencializa os resultados dos tratamentos estéticos.</p>
+        </div>
+        <div class="forwhom-card reveal reveal-delay-3">
+          <span class="forwhom-card__icon">◎</span>
+          <h3 class="forwhom-card__title">Queda Capilar</h3>
+          <p class="forwhom-card__desc">GHK-Cu tem ação documentada nos folículos pilosos — reduz a queda, melhora a densidade e estimula o crescimento de novos fios.</p>
+        </div>
+        <div class="forwhom-card reveal reveal-delay-4">
+          <span class="forwhom-card__icon">⬡</span>
+          <h3 class="forwhom-card__title">Biohackers</h3>
+          <p class="forwhom-card__desc">Para entusiastas de longevidade e otimização biológica que querem um peptídeo de qualidade clínica em alta concentração.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- STATS -->
   <div class="stats">
     <div class="container">
       <div class="stats__grid">
         <div class="stat-item reveal">
-          <div class="stat-item__num">100mg</div>
+          <div class="stat-item__num" data-target="100" data-suffix="mg">0mg</div>
           <div class="stat-item__label">Concentração de GHK-Cu por Dose</div>
         </div>
         <div class="stat-item reveal reveal-delay-1">
-          <div class="stat-item__num">Cu²⁺</div>
-          <div class="stat-item__label">Peptídeo de Cobre Puro</div>
+          <div class="stat-item__num" data-target="98" data-suffix="%+">0%</div>
+          <div class="stat-item__label">Pureza da Formulação</div>
         </div>
         <div class="stat-item reveal reveal-delay-2">
-          <div class="stat-item__num">3.2k</div>
-          <div class="stat-item__label">Avaliações 5 estrelas</div>
+          <div class="stat-item__num" data-target="3200" data-suffix="">0</div>
+          <div class="stat-item__label">Avaliações 5 Estrelas</div>
         </div>
         <div class="stat-item reveal reveal-delay-3">
           <div class="stat-item__num">#1</div>
@@ -1484,6 +1692,43 @@
       </div>
     </div>
   </div>
+
+  <!-- TIMELINE -->
+  <section class="section timeline">
+    <div class="container">
+      <div class="timeline__header reveal">
+        <div class="line"><span class="label">Progressão</span></div>
+        <h2 class="timeline__title">O que Esperar<br>Semana a Semana</h2>
+        <p class="timeline__sub">Resultados com uso contínuo e acompanhamento profissional. Cada organismo responde de forma única.</p>
+      </div>
+      <div class="timeline__track">
+        <div class="timeline__item reveal reveal-delay-1">
+          <div class="timeline__dot">I</div>
+          <div class="timeline__week">Semana 1–2</div>
+          <div class="timeline__result">Hidratação e Brilho</div>
+          <p class="timeline__desc">A pele apresenta maior hidratação e um brilho inicial perceptível. Primeiros sinais de melhora na textura superficial.</p>
+        </div>
+        <div class="timeline__item reveal reveal-delay-2">
+          <div class="timeline__dot">II</div>
+          <div class="timeline__week">Semana 3–4</div>
+          <div class="timeline__result">Textura e Firmeza</div>
+          <p class="timeline__desc">Textura progressivamente mais refinada. Primeiros sinais de firmeza e redução de linhas finas em regiões de expressão.</p>
+        </div>
+        <div class="timeline__item reveal reveal-delay-3">
+          <div class="timeline__dot">III</div>
+          <div class="timeline__week">Semana 6–8</div>
+          <div class="timeline__result">Elasticidade Notável</div>
+          <p class="timeline__desc">Elasticidade e volume visivelmente melhorados. Redução expressiva de rugas e manchas. Crescimento capilar pode ser observado.</p>
+        </div>
+        <div class="timeline__item reveal reveal-delay-4">
+          <div class="timeline__dot">IV</div>
+          <div class="timeline__week">Mês 3+</div>
+          <div class="timeline__result">Renovação Completa</div>
+          <p class="timeline__desc">Resultados plenos e acumulativos. Pele significativamente rejuvenescida, firme e com luminosidade duradoura.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- HOW IT WORKS -->
   <section class="section how" id="como-funciona">
@@ -1533,6 +1778,51 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROTOCOL -->
+  <section class="section protocol" id="protocolo">
+    <div class="container">
+      <div class="protocol__inner">
+        <div class="reveal">
+          <div class="line line--left"><span class="label">Protocolo</span></div>
+          <h2 style="font-size:clamp(2.4rem,4vw,3.6rem);color:var(--white);margin-bottom:48px">Como Usar<br>o GHK·CU</h2>
+          <div class="protocol__steps">
+            <div class="protocol__step">
+              <div class="protocol__num">1</div>
+              <div>
+                <div class="protocol__step-title">Consulte um Profissional</div>
+                <p class="protocol__step-desc">Antes de iniciar, consulte um médico ou esteticista habilitado. Ele definirá a dosagem ideal, a via de aplicação e a frequência para o seu caso.</p>
+              </div>
+            </div>
+            <div class="protocol__step">
+              <div class="protocol__num">2</div>
+              <div>
+                <div class="protocol__step-title">Aplicação Direcionada</div>
+                <p class="protocol__step-desc">O GHK-Cu pode ser aplicado diretamente na área de tratamento — rosto, pescoço, couro cabeludo — via injeção subcutânea ou mesoterapia sob supervisão.</p>
+              </div>
+            </div>
+            <div class="protocol__step">
+              <div class="protocol__num">3</div>
+              <div>
+                <div class="protocol__step-title">Consistência e Acompanhamento</div>
+                <p class="protocol__step-desc">Os melhores resultados são obtidos com uso contínuo por pelo menos 8–12 semanas. Fotos de acompanhamento ajudam a documentar a progressão.</p>
+              </div>
+            </div>
+            <div class="protocol__step">
+              <div class="protocol__num">4</div>
+              <div>
+                <div class="protocol__step-title">Combine com Microagulhamento</div>
+                <p class="protocol__step-desc">Para potencializar os resultados, muitos protocolos combinam o GHK-Cu com microagulhamento — os microcanais aumentam significativamente a absorção dérmica.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="protocol__visual">
+          <img src="vial.png" alt="GHK-Cu Protocolo de Uso" class="protocol__img" loading="lazy" />
         </div>
       </div>
     </div>
@@ -1817,12 +2107,30 @@
       buyBar.classList.toggle('visible', window.scrollY > window.innerHeight * 0.8);
     });
 
-    // Reveal on scroll
+    // Reveal on scroll + counter animation
+    function animateCounter(el) {
+      const target = parseInt(el.dataset.target);
+      const suffix = el.dataset.suffix || '';
+      if (!target) return;
+      const duration = 1600;
+      const start = performance.now();
+      const update = (now) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const value = Math.floor(ease * target);
+        el.textContent = value.toLocaleString('pt-BR') + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+      };
+      requestAnimationFrame(update);
+    }
+
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
           e.target.classList.add('visible');
+          e.target.querySelectorAll('[data-target]').forEach(animateCounter);
           observer.unobserve(e.target);
         }
       });
