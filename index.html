@@ -180,7 +180,7 @@
   <link rel="preload" as="image" href="vial.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     /* ── TOKENS ─────────────────────────────────────────────────── */
@@ -242,7 +242,7 @@
     .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
     h1,h2,h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; line-height: 1.15; }
     .label {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Manrope', sans-serif;
       font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: 0.22em;
@@ -328,6 +328,11 @@
     }
     .research-banner strong {
       color: #E8BE96;
+    }
+    .research-banner .lucide {
+      width: 13px; height: 13px;
+      stroke: #E8BE96; stroke-width: 2;
+      vertical-align: -2px; display: inline-block;
     }
     .nav {
       position: fixed;
@@ -681,8 +686,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.6rem;
       margin-bottom: 24px;
+    }
+    .benefit-card__icon .lucide {
+      width: 22px; height: 22px;
+      stroke: var(--copper); stroke-width: 1.5;
     }
     .benefit-card__title {
       font-family: 'Cormorant Garamond', serif;
@@ -900,8 +908,11 @@
       align-items: center;
       justify-content: center;
       color: var(--copper);
-      font-size: 1.2rem;
       transition: transform var(--transition);
+    }
+    .faq-item__icon .lucide {
+      width: 14px; height: 14px;
+      stroke: var(--copper); stroke-width: 2.5;
     }
     .faq-item.open .faq-item__icon { transform: rotate(45deg); }
     .faq-item__a {
@@ -1247,9 +1258,19 @@
       background: var(--surface);
     }
     .forwhom-card__icon {
-      font-size: 2.2rem;
-      margin-bottom: 20px;
-      display: block;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--gold-glow);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .forwhom-card__icon .lucide {
+      width: 22px; height: 22px;
+      stroke: var(--copper); stroke-width: 1.5;
     }
     .forwhom-card__title {
       font-family: 'Cormorant Garamond', serif;
@@ -1533,7 +1554,7 @@
   <!-- NAVIGATION -->
   <!-- RESEARCH BANNER -->
   <div class="research-banner" role="note" aria-label="Aviso de uso">
-    <strong>⚗ NÃO PARA USO HUMANO</strong> &nbsp;·&nbsp; Research Use Only — Exclusivo para Fins de Pesquisa Científica
+    <strong><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/></svg> NÃO PARA USO HUMANO</strong> &nbsp;·&nbsp; Research Use Only — Exclusivo para Fins de Pesquisa Científica
   </div>
 
   <nav class="nav" id="nav">
@@ -1704,32 +1725,32 @@
       </div>
       <div class="benefits__grid">
         <div class="benefit-card reveal reveal-delay-1">
-          <div class="benefit-card__icon">✦</div>
+          <div class="benefit-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg></div>
           <h3 class="benefit-card__title">Síntese de Colágeno</h3>
           <p class="benefit-card__desc">Estimula fibroblastos a produzirem colágeno tipos I e III — efeito amplamente documentado em modelos de cultura celular e estudos clínicos.</p>
         </div>
         <div class="benefit-card reveal reveal-delay-2">
-          <div class="benefit-card__icon">◈</div>
+          <div class="benefit-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg></div>
           <h3 class="benefit-card__title">Rejuvenescimento Profundo</h3>
           <p class="benefit-card__desc">Age diretamente na matriz extracelular — estudos demonstram modulação da expressão gênica relacionada ao envelhecimento dérmico.</p>
         </div>
         <div class="benefit-card reveal reveal-delay-3">
-          <div class="benefit-card__icon">⬡</div>
+          <div class="benefit-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></div>
           <h3 class="benefit-card__title">Reparo Tecidual</h3>
           <p class="benefit-card__desc">Acelera a cicatrização e regeneração celular — ideal para pós-procedimentos estéticos e protocolos de microagulhamento.</p>
         </div>
         <div class="benefit-card reveal reveal-delay-1">
-          <div class="benefit-card__icon">◎</div>
+          <div class="benefit-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M12.67 19a2 2 0 0 0 1.416-.588l6.154-6.172a6 6 0 0 0-8.49-8.49L5.586 9.914A2 2 0 0 0 5 11.328V18a1 1 0 0 0 1 1z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/></svg></div>
           <h3 class="benefit-card__title">Fortalecimento Capilar</h3>
           <p class="benefit-card__desc">O GHK-Cu age nos folículos pilosos para reduzir a queda e estimular o crescimento de cabelos mais densos e saudáveis.</p>
         </div>
         <div class="benefit-card reveal reveal-delay-2">
-          <div class="benefit-card__icon">⟡</div>
+          <div class="benefit-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
           <h3 class="benefit-card__title">Ação Anti-inflamatória</h3>
           <p class="benefit-card__desc">Reduz marcadores inflamatórios crônicos que aceleram o envelhecimento celular, promovendo um ambiente dérmico mais saudável.</p>
         </div>
         <div class="benefit-card reveal reveal-delay-3">
-          <div class="benefit-card__icon">◇</div>
+          <div class="benefit-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></div>
           <h3 class="benefit-card__title">Elasticidade e Firmeza</h3>
           <p class="benefit-card__desc">Estimula a produção de elastina e glicosaminoglicanos — marcadores consistentes em estudos de bioestimulação dérmica.</p>
         </div>
@@ -1746,22 +1767,22 @@
       </div>
       <div class="forwhom__grid">
         <div class="forwhom-card reveal reveal-delay-1">
-          <span class="forwhom-card__icon">✦</span>
+          <div class="forwhom-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg></div>
           <h3 class="forwhom-card__title">Pesquisa Dérmica</h3>
           <p class="forwhom-card__desc">Estudos de reparo e regeneração da matriz extracelular, síntese de colágeno e elastina em modelos in vitro e ex vivo.</p>
         </div>
         <div class="forwhom-card reveal reveal-delay-2">
-          <span class="forwhom-card__icon">◈</span>
+          <div class="forwhom-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg></div>
           <h3 class="forwhom-card__title">Protocolos Clínicos</h3>
           <p class="forwhom-card__desc">Pesquisa aplicada em contexto clínico supervisionado — microagulhamento, laser e bioestimulação, sob responsabilidade de profissional habilitado.</p>
         </div>
         <div class="forwhom-card reveal reveal-delay-3">
-          <span class="forwhom-card__icon">◎</span>
+          <div class="forwhom-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="m10 16 1.5 1.5"/><path d="m14 8-1.5-1.5"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m16.5 10.5 1 1"/><path d="m17 6-2.891-2.891"/><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="m20 9 .891.891"/><path d="M3.109 14.109 4 15"/><path d="m6.5 12.5 1 1"/><path d="m7 18 2.891 2.891"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/></svg></div>
           <h3 class="forwhom-card__title">Pesquisa Capilar</h3>
           <p class="forwhom-card__desc">GHK-Cu tem ação documentada sobre folículos pilosos em estudos publicados — campo ativo de pesquisa em tricologia e regeneração folicular.</p>
         </div>
         <div class="forwhom-card reveal reveal-delay-4">
-          <span class="forwhom-card__icon">⬡</span>
+          <div class="forwhom-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/></svg></div>
           <h3 class="forwhom-card__title">Longevidade &amp; Biociências</h3>
           <p class="forwhom-card__desc">Pesquisa em longevidade celular e otimização biológica — GHK-Cu como molécula sinalizadora estudada em modelos de envelhecimento.</p>
         </div>
@@ -2025,7 +2046,7 @@
         <div class="faq-item">
           <div class="faq-item__q">
             <span>O que é o GHK Cu e como ele funciona?</span>
-            <div class="faq-item__icon">+</div>
+            <div class="faq-item__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div>
           </div>
           <div class="faq-item__a">
             O GHK Cu é um produto com peptídeo de cobre (GHK-Cu) em alta concentração — 100mg por dose. Atua estimulando a síntese de colágeno e elastina, acelerando o reparo tecidual e promovendo a regeneração celular profunda. O peptídeo age na derme, ativando fibroblastos e reduzindo marcadores inflamatórios do envelhecimento.
@@ -2035,7 +2056,7 @@
         <div class="faq-item">
           <div class="faq-item__q">
             <span>O GHK-Cu é destinado ao uso humano direto?</span>
-            <div class="faq-item__icon">+</div>
+            <div class="faq-item__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div>
           </div>
           <div class="faq-item__a">
             Não. O GHK-Cu é exclusivamente para fins de pesquisa científica (Research Use Only). Não é destinado ao diagnóstico, tratamento, cura ou prevenção de doenças, nem ao consumo ou uso pessoal. A aquisição é voltada para pesquisadores, clínicas e profissionais habilitados.
@@ -2045,7 +2066,7 @@
         <div class="faq-item">
           <div class="faq-item__q">
             <span>Quais os efeitos observados em pesquisa?</span>
-            <div class="faq-item__icon">+</div>
+            <div class="faq-item__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div>
           </div>
           <div class="faq-item__a">
             Estudos publicados documentam efeitos na síntese de colágeno e elastina, modulação de fibroblastos, reparo tecidual e ação antioxidante. Os resultados variam conforme o modelo experimental, concentração utilizada e contexto do protocolo de pesquisa.
@@ -2055,7 +2076,7 @@
         <div class="faq-item">
           <div class="faq-item__q">
             <span>O produto pode ser combinado com microagulhamento?</span>
-            <div class="faq-item__icon">+</div>
+            <div class="faq-item__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div>
           </div>
           <div class="faq-item__a">
             Sim, o GHK Cu é amplamente utilizado em protocolos de microagulhamento por esteticistas e médicos. A combinação potencializa os resultados pois os microcanais criados pelo tratamento aumentam a absorção dos peptídeos pela pele. Sempre realize esse tipo de protocolo com um profissional habilitado.
@@ -2065,7 +2086,7 @@
         <div class="faq-item">
           <div class="faq-item__q">
             <span>Há estudos sobre GHK-Cu e folículos pilosos?</span>
-            <div class="faq-item__icon">+</div>
+            <div class="faq-item__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div>
           </div>
           <div class="faq-item__a">
             Sim. A literatura científica documenta efeitos do GHK-Cu sobre folículos pilosos — área ativa de pesquisa em tricologia e regeneração folicular. Estudos in vitro e modelos animais mostram modulação de fatores de crescimento relacionados ao ciclo capilar.
@@ -2075,7 +2096,7 @@
         <div class="faq-item">
           <div class="faq-item__q">
             <span>Como é feita a entrega e qual o prazo?</span>
-            <div class="faq-item__icon">+</div>
+            <div class="faq-item__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="lucide" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div>
           </div>
           <div class="faq-item__a">
             Trabalhamos com envio imediato após confirmação do pedido. O prazo de entrega varia de 2 a 7 dias úteis dependendo da localidade. O produto é embalado com máximo cuidado e enviado de forma discreta. Todos os pedidos possuem código de rastreamento.
