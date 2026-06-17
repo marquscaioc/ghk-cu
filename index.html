@@ -2228,15 +2228,57 @@
       l.addEventListener('click', () => menu.classList.remove('open'));
     });
 
-    // Smooth hero parallax on mousemove (subtle)
-    const hero = document.querySelector('.hero__visual');
-    if (hero) {
+    // Hero parallax: mousemove + scroll combined (desktop only)
+    (function() {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const heroVisual = document.querySelector('.hero__visual');
+      const heroContent = document.querySelector('.hero__content');
+      const heroSection = document.querySelector('.hero');
+      if (!heroVisual || !heroContent || prefersReduced) return;
+
+      let mouseX = 0, mouseY = 0, rafPending = false;
+
+      function applyVisual() {
+        if (window.innerWidth < 768) {
+          heroVisual.style.transform = '';
+          heroContent.style.transform = '';
+          rafPending = false;
+          return;
+        }
+        const scrollY = window.scrollY;
+        const heroH = heroSection ? heroSection.offsetHeight : window.innerHeight;
+        const scrollRatio = Math.min(scrollY / heroH, 1);
+        const scrollOffsetVisual = scrollRatio * heroH * 0.12;
+        const scrollOffsetContent = scrollRatio * heroH * 0.25;
+        heroVisual.style.transform = `translate(${mouseX}px, ${mouseY + scrollOffsetVisual}px)`;
+        heroContent.style.transform = `translateY(${scrollOffsetContent}px)`;
+        rafPending = false;
+      }
+
+      function scheduleUpdate() {
+        if (!rafPending) {
+          rafPending = true;
+          requestAnimationFrame(applyVisual);
+        }
+      }
+
       document.addEventListener('mousemove', e => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 8;
-        const y = (e.clientY / window.innerHeight - 0.5) * 8;
-        hero.style.transform = `translate(${x}px, ${y}px)`;
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 8;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 8;
+        scheduleUpdate();
       });
-    }
+
+      window.addEventListener('scroll', scheduleUpdate, { passive: true });
+
+      // Reset when hero leaves viewport
+      const heroObs = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) {
+          heroVisual.style.transform = '';
+          heroContent.style.transform = '';
+        }
+      }, { threshold: 0 });
+      heroObs.observe(heroSection || heroVisual);
+    })();
 
     // Magnetic buttons (desktop only)
     if (!('ontouchstart' in window) && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
