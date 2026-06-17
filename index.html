@@ -309,9 +309,29 @@
     .btn-lg { padding: 20px 48px; font-size: 0.96rem; }
 
     /* ── NAVIGATION ─────────────────────────────────────────────── */
-    .nav {
+    .research-banner {
       position: fixed;
       top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      background: #1a0a00;
+      border-bottom: 1px solid rgba(201,148,100,0.35);
+      padding: 8px 24px;
+      text-align: center;
+      font-size: 0.72rem;
+      font-family: 'Manrope', sans-serif;
+      letter-spacing: 0.08em;
+      color: rgba(232,190,150,0.9);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .research-banner strong {
+      color: #E8BE96;
+    }
+    .nav {
+      position: fixed;
+      top: 37px;
       left: 0;
       right: 0;
       z-index: 100;
@@ -360,7 +380,7 @@
       grid-template-columns: 1fr 1fr;
       align-items: center;
       gap: 80px;
-      padding-top: 72px;
+      padding-top: 109px;
       position: relative;
     }
     .hero::before {
@@ -1469,7 +1489,7 @@
     }
 
     @media (max-width: 1024px) {
-      .hero { grid-template-columns: 1fr; text-align: center; min-height: auto; padding: 120px 24px 60px; }
+      .hero { grid-template-columns: 1fr; text-align: center; min-height: auto; padding: 157px 24px 60px; }
       .hero__content { display: flex; flex-direction: column; align-items: center; }
       .hero__sub { text-align: center; }
       .hero__visual { display: flex; margin-top: 48px; }
@@ -1510,6 +1530,11 @@
 <body>
 
   <!-- NAVIGATION -->
+  <!-- RESEARCH BANNER -->
+  <div class="research-banner" role="note" aria-label="Aviso de uso">
+    <strong>⚗ NÃO PARA USO HUMANO</strong> &nbsp;·&nbsp; Research Use Only — Exclusivo para Fins de Pesquisa Científica
+  </div>
+
   <nav class="nav" id="nav">
     <div class="nav__inner">
       <a href="#" class="nav__logo">GHK·CU</a>
