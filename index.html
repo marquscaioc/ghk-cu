@@ -868,6 +868,54 @@
     }
     .faq-item.open .faq-item__a { max-height: 300px; padding-top: 18px; }
 
+    /* ── SECTION LIGHT SOURCES ──────────────────────────────── */
+    .ingredients { position: relative; }
+    .ingredients::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(201,148,100,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .ingredients__grid { position: relative; z-index: 1; }
+    .ingredients__header { position: relative; z-index: 1; }
+
+    .benefits { position: relative; }
+    .benefits::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: -100px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(201,148,100,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .benefits__header { position: relative; z-index: 1; }
+    .benefits__grid { position: relative; z-index: 1; }
+
+    .timeline { position: relative; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 500px;
+      background: radial-gradient(ellipse at top, rgba(201,148,100,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .timeline__header { position: relative; z-index: 1; }
+    .timeline__track { position: relative; z-index: 1; }
+
     /* ── CTA SECTION ────────────────────────────────────────────── */
     .cta-section {
       background: var(--bg2);
