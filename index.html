@@ -2793,14 +2793,16 @@
     const tl = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass — vidro farmacêutico teal; clearcoat baixo para a cor teal aparecer
+    // Glass — emissivo garante teal visível mesmo com reflexos do ambiente
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:              0x1e7d8a,   // teal saturado visível
-      roughness:          0.18,
+      color:              0x2a8a96,
+      emissive:           new THREE.Color(0.05, 0.28, 0.32),
+      emissiveIntensity:  0.55,
+      roughness:          0.28,
       metalness:          0.0,
-      clearcoat:          0.22,
-      clearcoatRoughness: 0.10,
-      envMapIntensity:    0.40,
+      clearcoat:          0.16,
+      clearcoatRoughness: 0.14,
+      envMapIntensity:    0.30,
       side:               THREE.DoubleSide,
     });
 
@@ -2858,33 +2860,30 @@
     });
 
     // ── Load OBJ ─────────────────────────────────────────────────────────────
+    // Usa o Vial.obj original Maya (Arnold slots: 3SG=glass, 1SG=cap, 2SG=rubber)
     let vialObj = null;
     const loader = new OBJLoader();
-    loader.load('/3d/vial_clean.obj',
+    loader.load('/3d/vial.obj',
       (obj) => {
-        // Bounding box antes de qualquer transformação (para detecção por Y)
         const rawBox  = new THREE.Box3().setFromObject(obj);
         const rawMinY = rawBox.min.y;
         const rawH    = rawBox.max.y - rawMinY;
 
         obj.traverse(child => {
           if (!child.isMesh) return;
-          const matName = Array.isArray(child.material)
+          const mn = Array.isArray(child.material)
             ? child.material.map(m => m.name || '').join(' ').toLowerCase()
             : (child.material?.name || '').toLowerCase();
-          const n  = child.name.toLowerCase();
-          const pn = (child.parent?.name || '').toLowerCase();
+          const n = child.name.toLowerCase();
 
-          if (matName.includes('label') || n.includes('label') || pn.includes('label')) {
-            child.material = matLabel;
-          } else if (matName.includes('rubber') || n.includes('rubber')) {
-            child.material = matRubber;
-          } else if (matName.includes('cap') || n.includes('cap')) {
-            child.material = matCap;
-          } else if (matName.includes('glass') || n.includes('glass')) {
+          // aiStandardSurface: 3SG=vidro, 1SG=tampa, 2SG=borracha
+          if (mn.includes('3sg') || n.includes('3sg')) {
             child.material = matGlass;
+          } else if (mn.includes('2sg') || n.includes('2sg')) {
+            child.material = matRubber;
+          } else if (mn.includes('1sg') || n.includes('1sg')) {
+            child.material = matCap;
           } else {
-            // Fallback por posição Y: rubber >88%, cap 72-88%, glass <72%
             const mb   = new THREE.Box3().setFromObject(child);
             const relY = ((mb.min.y + mb.max.y) / 2 - rawMinY) / rawH;
             child.material = relY > 0.88 ? matRubber : (relY > 0.72 ? matCap : matGlass);
@@ -2892,26 +2891,37 @@
           child.castShadow = false;
         });
 
-        // Centralizar e escalar
+        // Centralizar e escalar (vial.obj usa cm, Y-up; escala para 2 unidades)
         const box    = new THREE.Box3().setFromObject(obj);
         const center = box.getCenter(new THREE.Vector3());
         obj.position.sub(center);
-        const size   = box.getSize(new THREE.Vector3());
-        const sc     = 2 / Math.max(size.x, size.y, size.z);
+        const size = box.getSize(new THREE.Vector3());
+        const sc   = 2 / Math.max(size.x, size.y, size.z);
         obj.scale.setScalar(sc);
-        scene.add(obj);
 
-        // Pó azul no fundo do vial (esfera achatada)
-        const bodyR  = (size.x / 2) * sc;
-        const vialH  = size.y * sc;
+        // Dimensões em unidades Three.js após escala
+        const totalH = size.y * sc;          // ≈ 2.0
+        const bodyR  = Math.max(size.x, size.z) / 2 * sc * 0.985; // raio do corpo
+
+        // Pó azul no fundo
         const powder = new THREE.Mesh(
           new THREE.SphereGeometry(bodyR * 0.78, 40, 20),
           matPowder
         );
         powder.scale.set(1, 0.40, 1);
-        powder.position.set(0, -vialH * 0.34, 0);
+        powder.position.set(0, -totalH * 0.34, 0);
         scene.add(powder);
 
+        // Label cylinder programático — envolve o corpo do vial
+        // 4 mm offset do fundo, 17 mm de altura, sobre vial de 30 mm
+        const lblH     = totalH * (17 / 30);
+        const lblYcenter = -totalH / 2 + totalH * ((4 + 8.5) / 30);
+        const lblGeo   = new THREE.CylinderGeometry(bodyR, bodyR, lblH, 256, 1, true);
+        const lblMesh  = new THREE.Mesh(lblGeo, matLabel);
+        lblMesh.position.y = lblYcenter;
+        scene.add(lblMesh);
+
+        scene.add(obj);
         vialObj = obj;
         loading.style.display = 'none';
       },
