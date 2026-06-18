@@ -2866,8 +2866,8 @@
     loader.load('/3d/vial.obj',
       (obj) => {
         const rawBox  = new THREE.Box3().setFromObject(obj);
-        const rawMinY = rawBox.min.y;
-        const rawH    = rawBox.max.y - rawMinY;
+        const rawMinY = rawBox.min.y;           // ≈ 0 cm (base do vial Maya)
+        const rawH    = rawBox.max.y - rawMinY; // ≈ 3.0006 cm
 
         obj.traverse(child => {
           if (!child.isMesh) return;
@@ -2876,7 +2876,7 @@
             : (child.material?.name || '').toLowerCase();
           const n = child.name.toLowerCase();
 
-          // aiStandardSurface: 3SG=vidro, 1SG=tampa, 2SG=borracha
+          // aiStandardSurface slots: 3SG=vidro, 1SG=tampa, 2SG=borracha
           if (mn.includes('3sg') || n.includes('3sg')) {
             child.material = matGlass;
           } else if (mn.includes('2sg') || n.includes('2sg')) {
@@ -2891,7 +2891,7 @@
           child.castShadow = false;
         });
 
-        // Centralizar e escalar (vial.obj usa cm, Y-up; escala para 2 unidades)
+        // Centralizar e escalar — vial.obj em cm, Y-up → 2 Three.js units de altura
         const box    = new THREE.Box3().setFromObject(obj);
         const center = box.getCenter(new THREE.Vector3());
         obj.position.sub(center);
@@ -2899,27 +2899,28 @@
         const sc   = 2 / Math.max(size.x, size.y, size.z);
         obj.scale.setScalar(sc);
 
-        // Dimensões em unidades Three.js após escala
-        const totalH = size.y * sc;          // ≈ 2.0
-        const bodyR  = Math.max(size.x, size.z) / 2 * sc * 0.985; // raio do corpo
+        // Raio do corpo em espaço LOCAL (cm), antes do scale
+        const bodyRlocal = Math.max(size.x, size.z) / 2 * 0.986;
 
-        // Pó azul no fundo
-        const powder = new THREE.Mesh(
-          new THREE.SphereGeometry(bodyR * 0.78, 40, 20),
+        // Pó azul — filho de obj para herdar transforms automaticamente
+        const powderMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(bodyRlocal * 0.78, 40, 20),
           matPowder
         );
-        powder.scale.set(1, 0.40, 1);
-        powder.position.set(0, -totalH * 0.34, 0);
-        scene.add(powder);
+        powderMesh.scale.set(1, 0.40, 1);
+        // Posição em LOCAL cm: 10% do rawH acima do fundo
+        powderMesh.position.y = rawMinY + rawH * 0.10;
+        obj.add(powderMesh);
 
-        // Label cylinder programático — envolve o corpo do vial
-        // 4 mm offset do fundo, 17 mm de altura, sobre vial de 30 mm
-        const lblH     = totalH * (17 / 30);
-        const lblYcenter = -totalH / 2 + totalH * ((4 + 8.5) / 30);
-        const lblGeo   = new THREE.CylinderGeometry(bodyR, bodyR, lblH, 256, 1, true);
-        const lblMesh  = new THREE.Mesh(lblGeo, matLabel);
-        lblMesh.position.y = lblYcenter;
-        scene.add(lblMesh);
+        // Label cylinder — filho de obj em coords locais (cm)
+        // herda obj.position e obj.scale → posição correta sem cálculo de world space
+        const localLblH  = rawH * (17.0 / 30.0);                   // 17 mm em cm
+        const localLblY  = rawMinY + rawH * ((4.0 + 8.5) / 30.0);  // centro: 4 mm + 8.5 mm
+        const localBodyR = bodyRlocal * 1.001;                      // offset mínimo anti-zfight
+        const lblGeo     = new THREE.CylinderGeometry(localBodyR, localBodyR, localLblH, 256, 1, true);
+        const lblMesh    = new THREE.Mesh(lblGeo, matLabel);
+        lblMesh.position.y = localLblY;
+        obj.add(lblMesh);
 
         scene.add(obj);
         vialObj = obj;
