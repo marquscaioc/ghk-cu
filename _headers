@@ -1,0 +1,10 @@
+/*.svg
+  Content-Type: image/svg+xml
+  Cache-Control: public, max-age=86400
+
+/*.png
+  Content-Type: image/png
+  Cache-Control: public, max-age=86400
+
+/index.html
+  Cache-Control: no-cache
