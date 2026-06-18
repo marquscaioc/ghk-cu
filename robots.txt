@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /termos-de-uso
+Disallow: /privacidade
+Disallow: /aviso-medico
+Disallow: /atendimento
+Disallow: /rastrear-pedido
+Disallow: /politica-devolucao
 
 Sitemap: https://ghkcuglow.com.br/sitemap.xml
