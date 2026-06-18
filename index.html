@@ -517,10 +517,22 @@
       height: 340px;
       filter: drop-shadow(0 20px 60px rgba(201,148,100,0.3));
     }
+    @keyframes badgeFloatUp {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); }
+    }
+    @keyframes badgeFloatDown {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(7px); }
+    }
+    @keyframes starGlow {
+      0%, 100% { opacity: 1; text-shadow: 0 0 0px var(--copper); }
+      50% { opacity: 0.8; text-shadow: 0 0 12px rgba(201,148,100,0.6); }
+    }
     .hero__badge {
       position: absolute;
       bottom: 80px;
-      left: -56px;
+      left: -40px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -530,6 +542,7 @@
       gap: 12px;
       backdrop-filter: blur(20px);
       z-index: 2;
+      animation: badgeFloatUp 4s ease-in-out infinite;
     }
     .hero__badge-icon {
       width: 40px;
@@ -547,15 +560,17 @@
     .hero__badge2 {
       position: absolute;
       top: 80px;
-      right: -28px;
+      right: -40px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 14px 18px;
       backdrop-filter: blur(20px);
       z-index: 2;
+      animation: badgeFloatDown 4s ease-in-out infinite;
+      animation-delay: 2s;
     }
-    .hero__stars { color: var(--copper); font-size: 0.9rem; }
+    .hero__stars { color: var(--copper); font-size: 0.9rem; animation: starGlow 3s ease-in-out infinite; }
     .hero__rating-text { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
 
     /* ── TRUST BAR ──────────────────────────────────────────────── */
@@ -1534,8 +1549,8 @@
       .hero__sub { text-align: center; }
       .hero__visual { display: flex; margin-top: 48px; }
       .hero__product-frame { width: 320px; height: 400px; }
-      .hero__badge { left: 0; bottom: 16px; }
-      .hero__badge2 { right: 0; top: 16px; }
+      .hero__badge { left: -8px; bottom: 16px; }
+      .hero__badge2 { right: -8px; top: 16px; }
       .benefits__grid { grid-template-columns: repeat(2,1fr); }
       .how__inner { grid-template-columns: 1fr; }
       .how__visual { display: none; }
@@ -2246,11 +2261,11 @@
   <!-- STICKY BUY BAR -->
   <div class="buy-bar" id="buyBar">
     <div class="buy-bar__info">
-      <div>
+      <div style="text-align:center">
         <div class="buy-bar__name">GHK·CU</div>
         <div class="buy-bar__dose">GHK-Cu 100mg · Peptídeo de Cobre</div>
+        <div class="buy-bar__stars">★★★★★</div>
       </div>
-      <div class="buy-bar__stars">★★★★★</div>
     </div>
     <a href="mailto:GHKCUGLOW@protonmail.com" class="btn btn-primary" style="padding:12px 28px;font-size:0.82rem">Solicitar para Pesquisa</a>
   </div>
