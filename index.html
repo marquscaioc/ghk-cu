@@ -2792,19 +2792,16 @@
     // ── Materials ─────────────────────────────────────────────────────────────
     const tl = new THREE.TextureLoader();
 
-    // Glass body — vidro escuro farmacêutico com transmissão real
+    // Glass body — vidro escuro opaco farmacêutico
+    // transmission + DoubleSide causa halo luminoso que faz label parecer flutuante
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:              0x0d1a26,   // azul-escuro farmacêutico
+      color:              0x0c1820,   // azul-escuro farmacêutico
       roughness:          0.04,
       metalness:          0.0,
-      ior:                1.52,       // IOR do vidro
-      transmission:       0.55,       // semi-transparente = vidro real, não metal
-      thickness:          0.6,        // profundidade da refração
-      clearcoat:          0.7,
-      clearcoatRoughness: 0.03,
-      reflectivity:       0.35,       // reduzido — metal tem 1.0, vidro ~0.35
-      envMapIntensity:    0.5,
-      side:               THREE.DoubleSide,
+      clearcoat:          0.9,
+      clearcoatRoughness: 0.02,
+      reflectivity:       0.3,
+      envMapIntensity:    0.55,
     });
 
     // Cap — white rubber stopper
@@ -2815,19 +2812,28 @@
       envMapIntensity: 0.3,
     });
 
-    // Label — real label texture from gráfica
+    // Label — real label texture + hot stamp copper foil
     const labelTex = tl.load('/3d/label_texture.png');
     labelTex.colorSpace = THREE.SRGBColorSpace;
     labelTex.wrapS    = THREE.RepeatWrapping;
-    labelTex.repeat.x = 0.838;  // circumference/label_width = (π×12)/45 — no seam
-    labelTex.offset.x = -0.10;  // center label on front face
+    labelTex.repeat.x = 0.838;  // circumference/label_width = (π×12)/45
+    labelTex.offset.x = -0.10;
+
+    // Hot stamp metalness map: bright areas = copper foil (metallic reflection)
+    const hotStampTex = tl.load('/3d/label_hotstamp.png');
+    hotStampTex.colorSpace = THREE.SRGBColorSpace;
+    hotStampTex.wrapS    = THREE.RepeatWrapping;
+    hotStampTex.repeat.x = 0.838;
+    hotStampTex.offset.x = -0.10;
+
     const matLabel = new THREE.MeshStandardMaterial({
       map:                labelTex,
-      roughness:          0.35,
-      metalness:          0,
-      envMapIntensity:    0.3,
+      metalnessMap:       hotStampTex,   // cobre onde o hot stamp é branco
+      metalness:          0.95,
+      roughness:          0.15,
+      envMapIntensity:    2.5,           // reflexo cobre visível
       polygonOffset:      true,
-      polygonOffsetFactor: -6,   // offset mais agressivo — garante label na frente do vidro
+      polygonOffsetFactor: -6,
       polygonOffsetUnits:  -6,
     });
 

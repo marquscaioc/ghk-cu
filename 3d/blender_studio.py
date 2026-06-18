@@ -141,28 +141,31 @@ bmesh.update_edit_mesh(vial_obj.data)
 bpy.ops.object.mode_set(mode='OBJECT')
 print(f"Cap/glass split at Z={cap_z_threshold:.4f}")
 
-# ── 7. Body radius (lower 70 % of height, tight fit for label) ────────────────
-body_z_limit = vial_z_min + vial_height * 0.70
+# ── 7. Body radius — only the true cylindrical zone (10 %–55 %) ──────────────
+# Avoids the bottom flange (0-10 %) AND the shoulder start at 65 %
+body_z_lower = vial_z_min + vial_height * 0.10
+body_z_upper = vial_z_min + vial_height * 0.55
 body_r_raw   = 0.0
 for v in vial_obj.data.vertices:
     wv = vial_obj.matrix_world @ mathutils.Vector(v.co)
-    if wv.z < body_z_limit:
+    if body_z_lower < wv.z < body_z_upper:
         body_r_raw = max(body_r_raw, abs(wv.x), abs(wv.y))
 
-# Minimal offset: just enough to avoid z-fighting (0.05 %)
-body_r = body_r_raw * 1.0005
-print(f"Body radius: raw={body_r_raw:.5f}  label={body_r:.5f}")
+body_r = body_r_raw * 1.0003   # 0.03 % offset to avoid z-fighting
+print(f"Body radius (10-55 % zone): raw={body_r_raw:.5f}  label={body_r:.5f}")
 
 # ── 8. Label cylinder ─────────────────────────────────────────────────────────
+# Height 17 mm (was 20 mm): keeps top edge at ~56 % of vial height,
+# well below the shoulder that starts narrowing at 65 %
 VIAL_H_MM    = 36.0
 VIAL_DIAM_MM = 12.0
 LABEL_W_MM   = 45.0
-LABEL_H_MM   = 20.0
+LABEL_H_MM   = 17.0
 
 label_h    = vial_height * (LABEL_H_MM / VIAL_H_MM)
 uv_scale_u = (math.pi * VIAL_DIAM_MM) / LABEL_W_MM   # 0.8378
 
-label_bottom = vial_z_min + vial_height * (3.0 / VIAL_H_MM)
+label_bottom = vial_z_min + vial_height * (4.0 / VIAL_H_MM)   # 4 mm from base
 label_z      = label_bottom + label_h / 2
 
 print(f"Label: h={label_h:.4f}  z_center={label_z:.4f}  uv_u={uv_scale_u:.4f}")
