@@ -10,7 +10,7 @@ Especificações verificadas:
 - CAS: 89030-95-5
 - Peso Molecular: 401,9 g/mol (complexo de Cu²⁺)
 - Estrutura: Gly-His-Lys · Cu²⁺
-- Concentração: 100 mg por unidade
+- Concentração: 100 mg por vial
 - Forma: Liofilizado (pó seco, estável)
 - Pureza: ≥98% (verificada por HPLC)
 - Enquadramento: Research Use Only (RUO)
