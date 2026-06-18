@@ -2793,15 +2793,15 @@
     const tl = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass — vidro farmacêutico teal, opaco com clearcoat vidroso
+    // Glass — vidro farmacêutico teal; clearcoat baixo para a cor teal aparecer
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:              0x0d3c42,
-      roughness:          0.04,
+      color:              0x1e7d8a,   // teal saturado visível
+      roughness:          0.18,
       metalness:          0.0,
-      clearcoat:          0.95,
-      clearcoatRoughness: 0.02,
-      envMapIntensity:    1.2,
-      side:               THREE.FrontSide,
+      clearcoat:          0.22,
+      clearcoatRoughness: 0.10,
+      envMapIntensity:    0.40,
+      side:               THREE.DoubleSide,
     });
 
     // Cap — alumínio prateado crimp seal
