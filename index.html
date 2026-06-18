@@ -2743,7 +2743,7 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.4;
+    renderer.toneMappingExposure = 0.85;
     renderer.shadowMap.enabled = false;
 
     // ── Scene + Camera ────────────────────────────────────────────────────────
@@ -2765,23 +2765,23 @@
 
     // ── Studio Lighting ───────────────────────────────────────────────────────
     // Key — warm copper
-    const key = new THREE.DirectionalLight(0xffc878, 4);
+    const key = new THREE.DirectionalLight(0xffc878, 1.8);
     key.position.set(4, 6, 4);
     scene.add(key);
     // Fill — cool blue
-    const fill = new THREE.DirectionalLight(0x8eb4e8, 1.2);
+    const fill = new THREE.DirectionalLight(0x8eb4e8, 0.6);
     fill.position.set(-4, 2, 3);
     scene.add(fill);
     // Rim — warm back
-    const rim = new THREE.DirectionalLight(0xffb060, 2.5);
+    const rim = new THREE.DirectionalLight(0xffb060, 1.0);
     rim.position.set(0, -1, -5);
     scene.add(rim);
     // Bounce bottom
-    const bounce = new THREE.DirectionalLight(0xc99464, 0.8);
+    const bounce = new THREE.DirectionalLight(0xc99464, 0.3);
     bounce.position.set(0, -4, 2);
     scene.add(bounce);
     // Ambient
-    scene.add(new THREE.AmbientLight(0x120e18, 6));
+    scene.add(new THREE.AmbientLight(0x120e18, 1.5));
 
     // ── Textures ──────────────────────────────────────────────────────────────
     const tl = new THREE.TextureLoader();
@@ -2803,7 +2803,7 @@
       normalScale:  new THREE.Vector2(1, 1),
       metalness:    1.0,
       roughness:    1.0,
-      envMapIntensity: 1.2,
+      envMapIntensity: 0.4,
     });
 
     // ── Environment map ───────────────────────────────────────────────────────
