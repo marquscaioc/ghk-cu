@@ -187,12 +187,35 @@ if body_obj:
     b_min_y  = min(v.y for v in bb_world)
     b_max_y  = max(v.y for v in bb_world)
 
-    # Use the max absolute value on each axis — not the diagonal (sqrt(x²+y²) would give 1.41× too large)
-    body_r = max(abs(b_max_x), abs(b_min_x), abs(b_max_y), abs(b_min_y)) * 1.003
+    body_h = b_max_z - b_min_z
 
-    body_h     = b_max_z - b_min_z
-    label_h    = body_h * 0.64
-    label_z    = (b_min_z + b_max_z) / 2 - body_h * 0.02
+    # Real-world dimensions: vial 36mm tall × 12mm diameter; label 45mm × 20mm
+    VIAL_H_MM    = 36.0
+    VIAL_DIAM_MM = 12.0
+    LABEL_W_MM   = 45.0
+    LABEL_H_MM   = 20.0
+
+    label_h = vial_height * (LABEL_H_MM / VIAL_H_MM)   # 55.6 % of total height
+
+    # UV Scale.X = circumference / label_width = (π×12) / 45 ≈ 0.838
+    uv_scale_u = (math.pi * VIAL_DIAM_MM) / LABEL_W_MM
+
+    # Position: leave 3mm gap from body bottom
+    label_bottom = b_min_z + vial_height * (3.0 / VIAL_H_MM)
+    label_z      = label_bottom + label_h / 2
+
+    # Radius: use only vertices in the BODY region (lower 70 % of Z range)
+    # to avoid the cap flange inflating the radius
+    body_z_limit = b_min_z + body_h * 0.70
+    body_r_raw   = 0.0
+    for o in all_meshes:
+        for v in o.data.vertices:
+            wv = o.matrix_world @ mathutils.Vector(v.co)
+            if wv.z < body_z_limit:
+                body_r_raw = max(body_r_raw, abs(wv.x), abs(wv.y))
+    body_r = body_r_raw * 1.003
+
+    print(f"Label: h={label_h:.3f} r={body_r:.3f} uv_scale_u={uv_scale_u:.3f} z={label_z:.3f}")
 
     bpy.ops.mesh.primitive_cylinder_add(
         vertices=256,
@@ -224,10 +247,11 @@ if body_obj:
     uvm_n  = nl.new('ShaderNodeUVMap');          uvm_n.location  = (-550, 100)
     uvm_n.uv_map = "UVMap"
 
-    # Front face native UV ≈0.5; label center content (Purity 98%+) ≈ U=0.40
+    # Front face native UV ≈0.5; center content (Purity 98%+) ≈ U=0.40
     # Offset = target - native = 0.40 - 0.50 = -0.10
+    # Scale.X = circumference/label_width = 0.838 → fits exactly one circumference of label
     map_n.inputs['Location'].default_value = (-0.10, 0.0, 0.0)
-    map_n.inputs['Scale'].default_value    = (1.0,   1.0, 1.0)
+    map_n.inputs['Scale'].default_value    = (uv_scale_u, 1.0, 1.0)
 
     lbl_img = bpy.data.images.load(LABEL_TEX)
     lbl_img.colorspace_settings.name = 'sRGB'

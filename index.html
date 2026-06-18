@@ -2792,18 +2792,16 @@
     // ── Materials ─────────────────────────────────────────────────────────────
     const tl = new THREE.TextureLoader();
 
-    // Glass body — clearcoat + low opacity (transmission física causa white-out com RoomEnvironment)
+    // Glass body — opaque dark glass (pharmaceutical vial look)
+    // Transparent glass shows any label gap as a visible ring — dark glass hides it
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:              0x6a8fa8,
-      roughness:          0.0,
+      color:              0x0e1620,
+      roughness:          0.05,
       metalness:          0.0,
       clearcoat:          1.0,
       clearcoatRoughness: 0.0,
-      reflectivity:       0.9,
-      envMapIntensity:    2.5,
-      transparent:        true,
-      opacity:            0.28,
-      side:               THREE.DoubleSide,
+      reflectivity:       1.0,
+      envMapIntensity:    2.0,
     });
 
     // Cap — white rubber stopper
@@ -2818,7 +2816,8 @@
     const labelTex = tl.load('/3d/label_texture.png');
     labelTex.colorSpace = THREE.SRGBColorSpace;
     labelTex.wrapS    = THREE.RepeatWrapping;
-    labelTex.offset.x = -0.10;  // center label front (matches Blender render)
+    labelTex.repeat.x = 0.838;  // circumference/label_width = (π×12)/45 — no seam
+    labelTex.offset.x = -0.10;  // center label on front face
     const matLabel = new THREE.MeshStandardMaterial({
       map:             labelTex,
       roughness:       0.35,
