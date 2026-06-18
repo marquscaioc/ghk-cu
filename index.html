@@ -1113,13 +1113,21 @@
       border-top: 1px solid var(--border);
       padding-top: 32px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
+      flex-direction: column;
+      gap: 20px;
     }
     .footer__disclaimer { font-size: 0.72rem; color: var(--text-muted); max-width: 700px; line-height: 1.65; }
-    .footer__copy { font-size: 0.72rem; color: var(--text-muted); }
+    .footer__legal {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .footer__legal a { color: var(--text-muted); text-decoration: none; transition: color var(--transition); }
+    .footer__legal a:hover { color: var(--copper-light); }
+    .footer__legal-sep { opacity: 0.35; }
 
     /* ── ANIMATIONS ─────────────────────────────────────────────── */
     .reveal {
@@ -1424,7 +1432,7 @@
       transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
     }
     .buy-bar.visible { transform: translateY(0); }
-    .buy-bar__info { display: flex; align-items: center; gap: 16px; }
+    .buy-bar__info { display: flex; align-items: center; gap: 16px; flex: 1; justify-content: center; }
     .buy-bar__name {
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.2rem;
@@ -2208,7 +2216,15 @@
         <p class="footer__disclaimer">
           ⚗ <strong>Research Use Only:</strong> Este produto é exclusivamente para fins de pesquisa científica. Não é destinado ao diagnóstico, tratamento, cura ou prevenção de doenças, nem ao uso humano direto. As informações contidas neste site têm caráter educativo e científico. Não apoiamos o uso sem supervisão profissional habilitada.
         </p>
-        <div class="footer__copy">© 2025 GHK·CU. Todos os direitos reservados.</div>
+        <div class="footer__legal">
+          <span>© 2026 GHK·CU Glow. Todos os direitos reservados.</span>
+          <span class="footer__legal-sep">·</span>
+          <a href="#">Termos de Uso</a>
+          <span class="footer__legal-sep">·</span>
+          <a href="#">Política de Privacidade</a>
+          <span class="footer__legal-sep">·</span>
+          <a href="#">Aviso Médico</a>
+        </div>
       </div>
     </div>
   </footer>
