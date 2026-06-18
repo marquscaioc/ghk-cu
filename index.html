@@ -2793,17 +2793,20 @@
     const tl = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass — emissivo garante teal visível mesmo com reflexos do ambiente
+    // Glass — transparente teal com fundo branco interno para parecer vidro
     const matGlass = new THREE.MeshPhysicalMaterial({
       color:              0x2a8a96,
-      emissive:           new THREE.Color(0.05, 0.28, 0.32),
-      emissiveIntensity:  0.55,
-      roughness:          0.28,
+      emissive:           new THREE.Color(0.04, 0.22, 0.26),
+      emissiveIntensity:  0.35,
+      roughness:          0.12,
       metalness:          0.0,
-      clearcoat:          0.16,
-      clearcoatRoughness: 0.14,
-      envMapIntensity:    0.30,
+      transparent:        true,
+      opacity:            0.72,
+      clearcoat:          0.55,
+      clearcoatRoughness: 0.06,
+      envMapIntensity:    0.45,
       side:               THREE.DoubleSide,
+      depthWrite:         false,
     });
 
     // Cap — alumínio prateado crimp seal
@@ -2850,13 +2853,12 @@
       polygonOffsetUnits:  -6,
     });
 
-    // Pó azul — criado programaticamente, não exportado no OBJ
-    const matPowder = new THREE.MeshStandardMaterial({
-      color:             0x1040e0,
-      emissive:          0x0a28cc,
-      emissiveIntensity: 0.80,
-      roughness:         0.92,
-      metalness:         0.0,
+    // Interior do vial — fundo branco visto através do vidro semitransparente
+    const matInterior = new THREE.MeshStandardMaterial({
+      color:    0xf4f8f8,
+      roughness: 0.9,
+      metalness: 0.0,
+      side:      THREE.BackSide,   // face interna: visível de fora pelo vidro
     });
 
     // ── Load OBJ ─────────────────────────────────────────────────────────────
@@ -2902,21 +2904,19 @@
         // Raio do corpo em espaço LOCAL (cm), antes do scale
         const bodyRlocal = Math.max(size.x, size.z) / 2 * 0.986;
 
-        // Pó azul — filho de obj para herdar transforms automaticamente
-        const powderMesh = new THREE.Mesh(
-          new THREE.SphereGeometry(bodyRlocal * 0.78, 40, 20),
-          matPowder
-        );
-        powderMesh.scale.set(1, 0.40, 1);
-        // Posição em LOCAL cm: 10% do rawH acima do fundo
-        powderMesh.position.y = rawMinY + rawH * 0.10;
-        obj.add(powderMesh);
+        // Cilindro interior — fundo branco visível pelo vidro semitransparente
+        const interiorH   = rawH * 0.82;
+        const interiorY   = rawMinY + rawH * 0.41;
+        const intGeo      = new THREE.CylinderGeometry(bodyRlocal * 0.93, bodyRlocal * 0.93, interiorH, 128, 1, true);
+        const intMesh     = new THREE.Mesh(intGeo, matInterior);
+        intMesh.position.y = interiorY;
+        obj.add(intMesh);
 
         // Label cylinder — filho de obj em coords locais (cm)
-        // herda obj.position e obj.scale → posição correta sem cálculo de world space
-        const localLblH  = rawH * (17.0 / 30.0);                   // 17 mm em cm
-        const localLblY  = rawMinY + rawH * ((4.0 + 8.5) / 30.0);  // centro: 4 mm + 8.5 mm
-        const localBodyR = bodyRlocal * 1.001;                      // offset mínimo anti-zfight
+        // centro em 8.5 mm do fundo → label de 0 mm a 17 mm, mostra mais vidro acima
+        const localLblH  = rawH * (17.0 / 30.0);
+        const localLblY  = rawMinY + rawH * (8.5 / 30.0);   // era 12.5, agora 8.5 mm
+        const localBodyR = bodyRlocal * 1.001;
         const lblGeo     = new THREE.CylinderGeometry(localBodyR, localBodyR, localLblH, 256, 1, true);
         const lblMesh    = new THREE.Mesh(lblGeo, matLabel);
         lblMesh.position.y = localLblY;
