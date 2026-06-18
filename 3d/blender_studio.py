@@ -21,7 +21,7 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 # ── 2. Render settings ────────────────────────────────────────────────────────
 scene = bpy.context.scene
 scene.render.engine            = 'CYCLES'
-scene.cycles.samples           = 256
+scene.cycles.samples           = 512
 scene.cycles.use_denoising     = True
 scene.cycles.denoiser          = 'OPENIMAGEDENOISE'
 
@@ -95,23 +95,32 @@ def make_glass():
     out  = nt.nodes.new('ShaderNodeOutputMaterial'); out.location  = (400, 0)
     bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled'); bsdf.location = (0, 0)
     nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
-    bsdf.inputs['Base Color'].default_value = (0.055, 0.087, 0.127, 1)
+    bsdf.inputs['Base Color'].default_value = (0.04, 0.20, 0.22, 1)  # teal pharmaceutical
     bsdf.inputs['Metallic'].default_value   = 0.0
     bsdf.inputs['Roughness'].default_value  = 0.04
-    bsdf.inputs['IOR'].default_value        = 1.47
+    bsdf.inputs['IOR'].default_value        = 1.50
+    try:
+        bsdf.inputs['Transmission Weight'].default_value = 0.82  # glass transparency
+    except KeyError:
+        bsdf.inputs['Transmission'].default_value = 0.82
     try:
         bsdf.inputs['Coat Weight'].default_value    = 1.0
         bsdf.inputs['Coat Roughness'].default_value = 0.0
     except KeyError: pass
+    m.use_backface_culling = False
     return m
 
 def make_cap():
     m = bpy.data.materials.new("VialCap")
     m.use_nodes = True
-    b = m.node_tree.nodes['Principled BSDF']
-    b.inputs['Base Color'].default_value = (0.96, 0.95, 0.94, 1)
-    b.inputs['Roughness'].default_value  = 0.55
-    b.inputs['Metallic'].default_value   = 0.0
+    nt = m.node_tree
+    for n in list(nt.nodes): nt.nodes.remove(n)
+    out  = nt.nodes.new('ShaderNodeOutputMaterial'); out.location  = (400, 0)
+    b    = nt.nodes.new('ShaderNodeBsdfPrincipled'); b.location    = (0, 0)
+    nt.links.new(b.outputs['BSDF'], out.inputs['Surface'])
+    b.inputs['Base Color'].default_value = (0.65, 0.67, 0.70, 1)  # silver aluminum
+    b.inputs['Roughness'].default_value  = 0.22
+    b.inputs['Metallic'].default_value   = 0.92
     return m
 
 mat_glass = make_glass()
@@ -217,14 +226,41 @@ ll.new(bsdf_l.outputs['BSDF'], out_l.inputs['Surface'])
 
 lbl_obj.data.materials.append(mat_lbl)
 
-# ── 9. World ──────────────────────────────────────────────────────────────────
+# ── 9. Blue powder content (render only — excluded from OBJ export) ──────────
+powder_r = body_r_raw * 0.78
+bpy.ops.mesh.primitive_uv_sphere_add(
+    radius=powder_r, segments=64, ring_count=32,
+    location=(0, 0, vial_z_min + vial_height * 0.12)
+)
+pow_obj      = bpy.context.active_object
+pow_obj.name = "VialContent"
+pow_obj.scale.z = 0.42  # flatten to oblate powder pile
+
+mat_pow = bpy.data.materials.new("VialContent")
+mat_pow.use_nodes = True
+pnt = mat_pow.node_tree
+for n in list(pnt.nodes): pnt.nodes.remove(n)
+out_p  = pnt.nodes.new('ShaderNodeOutputMaterial'); out_p.location  = (400, 0)
+bsdf_p = pnt.nodes.new('ShaderNodeBsdfPrincipled'); bsdf_p.location = (0, 0)
+pnt.links.new(bsdf_p.outputs['BSDF'], out_p.inputs['Surface'])
+bsdf_p.inputs['Base Color'].default_value = (0.02, 0.12, 0.92, 1)  # strong blue
+bsdf_p.inputs['Roughness'].default_value  = 0.90
+bsdf_p.inputs['Metallic'].default_value   = 0.0
+try:
+    bsdf_p.inputs['Emission Color'].default_value    = (0.05, 0.20, 1.00, 1)
+    bsdf_p.inputs['Emission Strength'].default_value = 0.6
+except KeyError: pass
+pow_obj.data.materials.append(mat_pow)
+print(f"Powder sphere: r={powder_r:.4f} at z={vial_z_min + vial_height * 0.12:.4f}")
+
+# ── 10. World ──────────────────────────────────────────────────────────────────
 world = bpy.data.worlds.new("StudioWorld")
 scene.world = world
 world.use_nodes = True
 world.node_tree.nodes['Background'].inputs['Color'].default_value    = (0.028, 0.031, 0.053, 1)
 world.node_tree.nodes['Background'].inputs['Strength'].default_value = 0.18
 
-# ── 10. Camera ────────────────────────────────────────────────────────────────
+# ── 11. Camera ────────────────────────────────────────────────────────────────
 cam_d = bpy.data.cameras.new("ProductCam"); cam_d.lens = 85
 cam_o = bpy.data.objects.new("Camera", cam_d)
 bpy.context.collection.objects.link(cam_o)
@@ -233,7 +269,7 @@ cam_o.location       = (0, -dist, 0)
 cam_o.rotation_euler = (math.radians(90), 0, 0)
 scene.camera = cam_o
 
-# ── 11. Studio lights (warm copper — no blue) ─────────────────────────────────
+# ── 12. Studio lights (warm copper — no blue) ─────────────────────────────────
 def area_light(name, energy, color, size, loc, rot_deg):
     d = bpy.data.lights.new(name, 'AREA')
     d.energy, d.color, d.size = energy, color, size
@@ -248,15 +284,16 @@ area_light("Fill",    550, (0.88, 0.91, 0.93), 5.0, (-h*2,  -h*0.4,  h*0.6), (-1
 area_light("Rim",    1800, (1.00, 0.74, 0.38), 0.8, (  0,    h*1.8,  h*1.0), ( 55, 0,   5))
 area_light("Bounce",  200, (0.92, 0.80, 0.60), 4.0, (  0,    0,     -h*1.8), (  0, 0,   0))
 
-# ── 12. Render ────────────────────────────────────────────────────────────────
+# ── 13. Render ────────────────────────────────────────────────────────────────
 print("=== Starting render ===")
 bpy.ops.render.render(write_still=True)
 print(f"=== Render saved: {RENDER_OUT} ===")
 
-# ── 13. Export OBJ for Three.js ───────────────────────────────────────────────
+# ── 14. Export OBJ for Three.js (exclude VialContent powder sphere) ───────────
 bpy.ops.object.select_all(action='DESELECT')
 for o in bpy.data.objects:
-    if o.type == 'MESH': o.select_set(True)
+    if o.type == 'MESH' and o.name != 'VialContent':
+        o.select_set(True)
 
 bpy.ops.wm.obj_export(
     filepath=OBJ_OUT,

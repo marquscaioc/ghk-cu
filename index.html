@@ -2792,24 +2792,26 @@
     // ── Materials ─────────────────────────────────────────────────────────────
     const tl = new THREE.TextureLoader();
 
-    // Glass body — vidro escuro opaco farmacêutico
-    // transmission + DoubleSide causa halo luminoso que faz label parecer flutuante
+    // Glass body — vidro teal farmacêutico transparente (mostra pó azul interno)
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:              0x0c1820,   // azul-escuro farmacêutico
+      color:              0x082e35,   // teal farmacêutico
       roughness:          0.04,
       metalness:          0.0,
-      clearcoat:          0.9,
+      transmission:       0.62,       // vidro semi-transparente
+      thickness:          0.55,       // espessura da parede
+      ior:                1.50,
+      clearcoat:          0.95,
       clearcoatRoughness: 0.02,
-      reflectivity:       0.3,
-      envMapIntensity:    0.55,
+      envMapIntensity:    0.5,
+      side:               THREE.FrontSide,
     });
 
-    // Cap — white rubber stopper
+    // Cap — alumínio prateado crimp seal
     const matCap = new THREE.MeshStandardMaterial({
-      color:           0xF4F2EF,
-      roughness:       0.55,
-      metalness:       0,
-      envMapIntensity: 0.3,
+      color:           0x9CA4AB,   // prata alumínio
+      roughness:       0.22,
+      metalness:       0.90,
+      envMapIntensity: 1.8,
     });
 
     // Label — real label texture + hot stamp copper foil
@@ -2863,8 +2865,28 @@
         // Scale to ~2 units tall
         const size   = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        obj.scale.setScalar(2 / maxDim);
+        const sc     = 2 / maxDim;
+        obj.scale.setScalar(sc);
         scene.add(obj);
+
+        // Pó azul interno — esfera achatada no fundo do vial
+        const bodyR  = (size.x / 2) * sc;   // raio do corpo escalado
+        const vialH  = size.y * sc;           // altura total escalada (~2)
+        const matPowder = new THREE.MeshStandardMaterial({
+          color:             0x1040e0,
+          emissive:          0x0820b8,
+          emissiveIntensity: 0.55,
+          roughness:         0.92,
+          metalness:         0.0,
+        });
+        const powder = new THREE.Mesh(
+          new THREE.SphereGeometry(bodyR * 0.80, 40, 20),
+          matPowder
+        );
+        powder.scale.set(1, 0.42, 1);         // achatado horizontal
+        powder.position.set(0, -vialH * 0.35, 0);  // fundo do vial
+        scene.add(powder);
+
         vialObj = obj;
         loading.style.display = 'none';
       },
