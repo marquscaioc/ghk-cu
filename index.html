@@ -2792,17 +2792,18 @@
     // ── Materials ─────────────────────────────────────────────────────────────
     const tl = new THREE.TextureLoader();
 
-    // Glass body — Principled physical with transmission
+    // Glass body — clearcoat + low opacity (transmission física causa white-out com RoomEnvironment)
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:           0xddeef8,
-      transmission:    0.92,
-      roughness:       0.02,
-      metalness:       0,
-      ior:             1.47,
-      thickness:       0.6,
-      envMapIntensity: 2.0,
-      transparent:     true,
-      side:            THREE.DoubleSide,
+      color:              0x6a8fa8,
+      roughness:          0.0,
+      metalness:          0.0,
+      clearcoat:          1.0,
+      clearcoatRoughness: 0.0,
+      reflectivity:       0.9,
+      envMapIntensity:    2.5,
+      transparent:        true,
+      opacity:            0.28,
+      side:               THREE.DoubleSide,
     });
 
     // Cap — white rubber stopper
