@@ -1429,8 +1429,7 @@
       position: fixed;
       bottom: 28px;
       right: 28px;
-      z-index: 200;
-      transition: bottom 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.25s ease, box-shadow 0.25s ease;
+      z-index: 300;
       width: 58px;
       height: 58px;
       border-radius: 50%;
@@ -1439,7 +1438,8 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 8px 32px rgba(201,148,100,0.35);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      pointer-events: auto;
+      transition: bottom 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.25s ease, box-shadow 0.25s ease;
     }
     .wa-float:hover {
       transform: scale(1.08) translateY(-2px);
@@ -1704,6 +1704,7 @@
       <div class="marquee__item"><span>Elastina &amp; Colágeno</span><div class="marquee__dot"></div></div>
       <div class="marquee__item"><span>Purity 98%+</span><div class="marquee__dot"></div></div>
       <div class="marquee__item"><span>Top 1 em Vendas</span><div class="marquee__dot"></div></div>
+      <div class="marquee__item"><span>Produto Importado</span><div class="marquee__dot"></div></div>
       <!-- duplicado para loop contínuo -->
       <div class="marquee__item"><span>GHK-Cu 100mg</span><div class="marquee__dot"></div></div>
       <div class="marquee__item"><span>Síntese de Colágeno</span><div class="marquee__dot"></div></div>
@@ -1715,6 +1716,7 @@
       <div class="marquee__item"><span>Elastina &amp; Colágeno</span><div class="marquee__dot"></div></div>
       <div class="marquee__item"><span>Purity 98%+</span><div class="marquee__dot"></div></div>
       <div class="marquee__item"><span>Top 1 em Vendas</span><div class="marquee__dot"></div></div>
+      <div class="marquee__item"><span>Produto Importado</span><div class="marquee__dot"></div></div>
     </div>
   </div>
 
@@ -1736,7 +1738,7 @@
         <div class="ingredient-feature__content">
           <div class="ingredient-feature__mol">Cu²⁺</div>
           <h3 class="ingredient-feature__name">GHK-Cu</h3>
-          <div class="ingredient-feature__dose">100mg · Peptídeo de Cobre · Purity 98%+</div>
+          <div class="ingredient-feature__dose">100mg · Peptídeo de Cobre · Purity 98%+ · Importado</div>
           <p class="ingredient-feature__desc">
             O GHK-Cu (Glicil-L-Histidil-L-Lisina) é um peptídeo triplo naturalmente presente na pele que estimula a síntese de colágeno e elastina, acelera a cicatrização e exerce ação antioxidante potente. Com a idade, seus níveis caem drasticamente — o GHK·CU recompõe essa deficiência em alta concentração, com <strong style="color:var(--copper-light)">100mg por vial</strong> para máxima eficácia.
           </p>
@@ -2173,7 +2175,7 @@
             </div>
             <div class="product-card__feature">
               <div class="product-card__feature-dot"></div>
-              <span>100% original · Envio imediato</span>
+              <span>Produto Importado · Envio imediato</span>
             </div>
             <div class="product-card__feature">
               <div class="product-card__feature-dot"></div>

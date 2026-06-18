@@ -13,6 +13,7 @@ Especificações verificadas:
 - Concentração: 100 mg por vial
 - Forma: Liofilizado (pó seco, estável)
 - Pureza: ≥98% (verificada por HPLC)
+- Origem: Produto Importado
 - Enquadramento: Research Use Only (RUO)
 - Armazenamento: liofilizado a -20 °C (até 24 meses); reconstituído 2–8 °C (até 7 dias)
 
