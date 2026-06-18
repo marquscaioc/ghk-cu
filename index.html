@@ -1408,6 +1408,7 @@
       bottom: 28px;
       right: 28px;
       z-index: 200;
+      transition: bottom 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.25s ease, box-shadow 0.25s ease;
       width: 58px;
       height: 58px;
       border-radius: 50%;
@@ -1423,6 +1424,7 @@
       box-shadow: 0 12px 40px rgba(201,148,100,0.5);
     }
     .wa-float svg { width: 26px; height: 26px; }
+    .buy-bar.visible ~ .wa-float { bottom: 96px; }
 
     /* ── STICKY BUY BAR ─────────────────────────────────────────── */
     .buy-bar {
@@ -1458,7 +1460,7 @@
     @media (max-width: 640px) {
       .buy-bar__stars { display: none; }
       .buy-bar { padding: 12px 16px; }
-      .wa-float { bottom: 80px; }
+      .buy-bar.visible ~ .wa-float { bottom: 84px; }
     }
 
     /* ── INGREDIENT FEATURE ─────────────────────────────────────── */
@@ -2241,11 +2243,6 @@
     </div>
   </footer>
 
-  <!-- FLOATING EMAIL BUTTON -->
-  <a class="wa-float" href="mailto:GHKCUGLOW@protonmail.com" aria-label="Enviar E-mail">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-  </a>
-
   <!-- STICKY BUY BAR -->
   <div class="buy-bar" id="buyBar">
     <div class="buy-bar__info">
@@ -2257,6 +2254,11 @@
     </div>
     <a href="mailto:GHKCUGLOW@protonmail.com" class="btn btn-primary" style="padding:12px 28px;font-size:0.82rem">Solicitar para Pesquisa</a>
   </div>
+
+  <!-- FLOATING EMAIL BUTTON -->
+  <a class="wa-float" href="mailto:GHKCUGLOW@protonmail.com" aria-label="Enviar E-mail">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+  </a>
 
   <script>
     // NAV + buy bar scroll
