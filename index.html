@@ -2793,20 +2793,20 @@
     const tl = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass — transparente teal com fundo branco interno para parecer vidro
+    // Glass — teal semitransparente, depthWrite:true evita overlay sobre o label
     const matGlass = new THREE.MeshPhysicalMaterial({
       color:              0x2a8a96,
       emissive:           new THREE.Color(0.04, 0.22, 0.26),
-      emissiveIntensity:  0.35,
-      roughness:          0.12,
+      emissiveIntensity:  0.42,
+      roughness:          0.10,
       metalness:          0.0,
       transparent:        true,
-      opacity:            0.72,
+      opacity:            0.88,
+      depthWrite:         true,
       clearcoat:          0.55,
       clearcoatRoughness: 0.06,
-      envMapIntensity:    0.45,
+      envMapIntensity:    0.40,
       side:               THREE.DoubleSide,
-      depthWrite:         false,
     });
 
     // Cap — alumínio prateado crimp seal
@@ -2853,13 +2853,7 @@
       polygonOffsetUnits:  -6,
     });
 
-    // Interior do vial — fundo branco visto através do vidro semitransparente
-    const matInterior = new THREE.MeshStandardMaterial({
-      color:    0xf4f8f8,
-      roughness: 0.9,
-      metalness: 0.0,
-      side:      THREE.BackSide,   // face interna: visível de fora pelo vidro
-    });
+    // placeholder — removido (interior cylinder causava faixa branca)
 
     // ── Load OBJ ─────────────────────────────────────────────────────────────
     // Usa o Vial.obj original Maya (Arnold slots: 3SG=glass, 1SG=cap, 2SG=rubber)
@@ -2904,18 +2898,10 @@
         // Raio do corpo em espaço LOCAL (cm), antes do scale
         const bodyRlocal = Math.max(size.x, size.z) / 2 * 0.986;
 
-        // Cilindro interior — fundo branco visível pelo vidro semitransparente
-        const interiorH   = rawH * 0.82;
-        const interiorY   = rawMinY + rawH * 0.41;
-        const intGeo      = new THREE.CylinderGeometry(bodyRlocal * 0.93, bodyRlocal * 0.93, interiorH, 128, 1, true);
-        const intMesh     = new THREE.Mesh(intGeo, matInterior);
-        intMesh.position.y = interiorY;
-        obj.add(intMesh);
-
         // Label cylinder — filho de obj em coords locais (cm)
-        // centro em 8.5 mm do fundo → label de 0 mm a 17 mm, mostra mais vidro acima
+        // centro em 11 mm do fundo: label de 2.5 mm a 19.5 mm, ~6 mm de vidro acima
         const localLblH  = rawH * (17.0 / 30.0);
-        const localLblY  = rawMinY + rawH * (8.5 / 30.0);   // era 12.5, agora 8.5 mm
+        const localLblY  = rawMinY + rawH * (11.0 / 30.0);
         const localBodyR = bodyRlocal * 1.001;
         const lblGeo     = new THREE.CylinderGeometry(localBodyR, localBodyR, localLblH, 256, 1, true);
         const lblMesh    = new THREE.Mesh(lblGeo, matLabel);
