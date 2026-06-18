@@ -187,10 +187,8 @@ if body_obj:
     b_min_y  = min(v.y for v in bb_world)
     b_max_y  = max(v.y for v in bb_world)
 
-    body_r  = max(
-        math.sqrt(b_max_x**2 + b_max_y**2),
-        math.sqrt(b_min_x**2 + b_min_y**2)
-    ) * 1.002   # 0.2 % outside glass
+    # Use the max absolute value on each axis — not the diagonal (sqrt(x²+y²) would give 1.41× too large)
+    body_r = max(abs(b_max_x), abs(b_min_x), abs(b_max_y), abs(b_min_y)) * 1.003
 
     body_h     = b_max_z - b_min_z
     label_h    = body_h * 0.64
