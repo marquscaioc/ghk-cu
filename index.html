@@ -2819,10 +2819,13 @@
     labelTex.repeat.x = 0.838;  // circumference/label_width = (π×12)/45 — no seam
     labelTex.offset.x = -0.10;  // center label on front face
     const matLabel = new THREE.MeshStandardMaterial({
-      map:             labelTex,
-      roughness:       0.35,
-      metalness:       0,
-      envMapIntensity: 0.3,
+      map:                labelTex,
+      roughness:          0.35,
+      metalness:          0,
+      envMapIntensity:    0.3,
+      polygonOffset:      true,   // push label in front of glass surface — no gap visible
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits:  -1,
     });
 
     // ── Load OBJ ─────────────────────────────────────────────────────────────
@@ -2832,11 +2835,12 @@
       (obj) => {
         obj.traverse(child => {
           if (!child.isMesh) return;
-          const n = child.name.toLowerCase();
-          const pn = (child.parent?.name || '').toLowerCase();
-          if (n.includes('cap') || n.includes('2sg')) {
+          const n       = child.name.toLowerCase();
+          const pn      = (child.parent?.name || '').toLowerCase();
+          const matName = (child.material?.name || '').toLowerCase();
+          if (matName.includes('cap') || n.includes('cap') || n.includes('2sg')) {
             child.material = matCap;
-          } else if (n.includes('label') || pn.includes('label')) {
+          } else if (matName.includes('label') || n.includes('label') || pn.includes('label')) {
             child.material = matLabel;
           } else {
             child.material = matGlass;
