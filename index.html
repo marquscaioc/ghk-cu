@@ -2793,20 +2793,15 @@
     const tl = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass — vidro farmacêutico teal, translúcido, mostra conteúdo interno
+    // Glass — vidro farmacêutico teal, opaco com clearcoat vidroso
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:               0xffffff,   // vidro claro — tonalidade vem da atenuação
-      roughness:           0.04,
-      metalness:           0.0,
-      transmission:        0.88,
-      thickness:           0.28,
-      attenuationDistance: 1.8,
-      attenuationColor:    new THREE.Color(0.10, 0.72, 0.76),  // teal farmacêutico
-      ior:                 1.50,
-      clearcoat:           0.95,
-      clearcoatRoughness:  0.02,
-      envMapIntensity:     0.5,
-      side:                THREE.FrontSide,
+      color:              0x0d3c42,
+      roughness:          0.04,
+      metalness:          0.0,
+      clearcoat:          0.95,
+      clearcoatRoughness: 0.02,
+      envMapIntensity:    1.2,
+      side:               THREE.FrontSide,
     });
 
     // Cap — alumínio prateado crimp seal
@@ -2817,12 +2812,20 @@
       envMapIntensity: 2.0,
     });
 
+    // Rubber stopper — borracha branca no topo
+    const matRubber = new THREE.MeshStandardMaterial({
+      color:           0xDDDFE0,
+      roughness:       0.70,
+      metalness:       0.0,
+      envMapIntensity: 0.4,
+    });
+
     // Label — adesivo metalizado com hot stamp cobre
     function loadTex(url) {
       const t = tl.load(url);
       t.colorSpace    = THREE.SRGBColorSpace;
       t.wrapS         = THREE.RepeatWrapping;
-      t.repeat.x      = 0.838;
+      t.repeat.x      = 1.034;   // π × 14.82mm / 45mm
       t.offset.x      = -0.10;
       t.anisotropy    = maxAniso;
       t.minFilter     = THREE.LinearMipmapLinearFilter;
@@ -2834,10 +2837,12 @@
 
     const matLabel = new THREE.MeshStandardMaterial({
       map:                 labelTex,
-      metalnessMap:        hotStampTex,
-      metalness:           0.95,
-      roughness:           0.12,
-      envMapIntensity:     3.0,
+      roughnessMap:        hotStampTex,   // preto=espelho bronze, branco=matte escuro
+      roughness:           1.0,           // base multiplicada pelo mapa
+      metalness:           0.88,
+      emissive:            new THREE.Color(0x1a0a00),
+      emissiveIntensity:   0.12,
+      envMapIntensity:     3.5,
       polygonOffset:       true,
       polygonOffsetFactor: -6,
       polygonOffsetUnits:  -6,
@@ -2872,13 +2877,17 @@
 
           if (matName.includes('label') || n.includes('label') || pn.includes('label')) {
             child.material = matLabel;
+          } else if (matName.includes('rubber') || n.includes('rubber')) {
+            child.material = matRubber;
           } else if (matName.includes('cap') || n.includes('cap')) {
             child.material = matCap;
+          } else if (matName.includes('glass') || n.includes('glass')) {
+            child.material = matGlass;
           } else {
-            // Fallback por posição Y: cap está no topo 25% do vial
+            // Fallback por posição Y: rubber >88%, cap 72-88%, glass <72%
             const mb   = new THREE.Box3().setFromObject(child);
             const relY = ((mb.min.y + mb.max.y) / 2 - rawMinY) / rawH;
-            child.material = relY > 0.72 ? matCap : matGlass;
+            child.material = relY > 0.88 ? matRubber : (relY > 0.72 ? matCap : matGlass);
           }
           child.castShadow = false;
         });

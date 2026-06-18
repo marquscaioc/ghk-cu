@@ -1,19 +1,24 @@
 """
-GHK-Cu Glow — Blender 5.1 Studio Script  (v3 — smooth base.obj)
+GHK-Cu Glow — Blender 5.1 Studio Script  (v4 — Maya Vial.obj, 3 materials)
 Run: blender --background --python blender_studio.py
 """
 import bpy
-import bmesh
 import math
 import os
 import mathutils
 
 BASE_DIR   = r"C:\Users\Caio\Desktop\GHK CU GLOW\3d"
-VIAL_OBJ   = r"C:\Users\Caio\Downloads\render_preview\base.obj"
+VIAL_OBJ   = r"C:\Users\Caio\Downloads\vial_new\source\Vial.obj"
 LABEL_TEX  = os.path.join(BASE_DIR, "label_texture.png")
 RENDER_OUT = os.path.join(BASE_DIR, "render_product.png")
 OBJ_OUT    = os.path.join(BASE_DIR, "vial_clean.obj")
 BLEND_OUT  = os.path.join(BASE_DIR, "vial_studio.blend")
+
+# Real-world vial dimensions (cm, matches file units)
+VIAL_H_MM    = 30.0   # vial height ≈ 30 mm (file height 3.0006 cm)
+VIAL_DIAM_MM = 14.82  # body diameter ≈ 14.82 mm (body radius 0.74076 cm × 2 × 10)
+LABEL_W_MM   = 45.0
+LABEL_H_MM   = 17.0
 
 # ── 1. Reset ─────────────────────────────────────────────────────────────────
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -58,12 +63,12 @@ except Exception:
 scene.view_settings.exposure = -0.3
 scene.view_settings.gamma    = 1.0
 
-# ── 3. Import base.obj (Blender 4.3.2 export — Y-up) ─────────────────────────
+# ── 3. Import Maya Vial.obj (Y-up, cm units) ──────────────────────────────────
 bpy.ops.wm.obj_import(filepath=VIAL_OBJ, forward_axis='NEGATIVE_Z', up_axis='Y')
 meshes = [o for o in bpy.data.objects if o.type == 'MESH']
 print("Imported:", [o.name for o in meshes])
 
-# ── 4. Center at world origin (per-vertex world-space) ────────────────────────
+# ── 4. Center at world origin ─────────────────────────────────────────────────
 all_verts_w = []
 for o in meshes:
     for v in o.data.vertices:
@@ -82,76 +87,77 @@ for o in meshes:
     o.location.y -= cy
     o.location.z -= cz
 
-vial_z_min = vial_z_min_raw - cz   # ≈ -height/2
-vial_z_max = vial_z_max_raw - cz   # ≈ +height/2
+vial_z_min = vial_z_min_raw - cz
+vial_z_max = vial_z_max_raw - cz
 print(f"Centered. Height: {vial_height:.4f}  Z: {vial_z_min:.4f} → {vial_z_max:.4f}")
 
 # ── 5. Materials ──────────────────────────────────────────────────────────────
-def make_glass():
-    m = bpy.data.materials.new("VialGlass")
+def new_mat(name):
+    m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
     for n in list(nt.nodes): nt.nodes.remove(n)
     out  = nt.nodes.new('ShaderNodeOutputMaterial'); out.location  = (400, 0)
     bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled'); bsdf.location = (0, 0)
     nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
-    bsdf.inputs['Base Color'].default_value = (0.04, 0.20, 0.22, 1)  # teal pharmaceutical
-    bsdf.inputs['Metallic'].default_value   = 0.0
-    bsdf.inputs['Roughness'].default_value  = 0.04
-    bsdf.inputs['IOR'].default_value        = 1.50
+    return m, bsdf
+
+def make_glass():
+    m, b = new_mat("VialGlass")
+    b.inputs['Base Color'].default_value = (0.04, 0.20, 0.22, 1)  # teal
+    b.inputs['Metallic'].default_value   = 0.0
+    b.inputs['Roughness'].default_value  = 0.04
+    b.inputs['IOR'].default_value        = 1.50
     try:
-        bsdf.inputs['Transmission Weight'].default_value = 0.82  # glass transparency
+        b.inputs['Transmission Weight'].default_value = 0.82
     except KeyError:
-        bsdf.inputs['Transmission'].default_value = 0.82
+        b.inputs['Transmission'].default_value = 0.82
     try:
-        bsdf.inputs['Coat Weight'].default_value    = 1.0
-        bsdf.inputs['Coat Roughness'].default_value = 0.0
+        b.inputs['Coat Weight'].default_value    = 1.0
+        b.inputs['Coat Roughness'].default_value = 0.0
     except KeyError: pass
     m.use_backface_culling = False
     return m
 
 def make_cap():
-    m = bpy.data.materials.new("VialCap")
-    m.use_nodes = True
-    nt = m.node_tree
-    for n in list(nt.nodes): nt.nodes.remove(n)
-    out  = nt.nodes.new('ShaderNodeOutputMaterial'); out.location  = (400, 0)
-    b    = nt.nodes.new('ShaderNodeBsdfPrincipled'); b.location    = (0, 0)
-    nt.links.new(b.outputs['BSDF'], out.inputs['Surface'])
-    b.inputs['Base Color'].default_value = (0.65, 0.67, 0.70, 1)  # silver aluminum
-    b.inputs['Roughness'].default_value  = 0.22
-    b.inputs['Metallic'].default_value   = 0.92
+    m, b = new_mat("VialCap")
+    b.inputs['Base Color'].default_value = (0.70, 0.72, 0.74, 1)  # silver aluminum
+    b.inputs['Roughness'].default_value  = 0.20
+    b.inputs['Metallic'].default_value   = 0.94
     return m
 
-mat_glass = make_glass()
-mat_cap   = make_cap()
+def make_rubber():
+    m, b = new_mat("VialRubber")
+    b.inputs['Base Color'].default_value = (0.88, 0.88, 0.86, 1)  # off-white rubber stopper
+    b.inputs['Roughness'].default_value  = 0.65
+    b.inputs['Metallic'].default_value   = 0.0
+    return m
 
-# ── 6. Assign cap / glass by face Z-position ──────────────────────────────────
-# Cap = top 22 % of vial height (faces above 78th percentile)
-cap_z_threshold = vial_z_min + vial_height * 0.78
+mat_glass  = make_glass()
+mat_cap    = make_cap()
+mat_rubber = make_rubber()
 
+# ── 6. Assign materials by Arnold slot name (no bmesh splitting needed) ────────
+# Maya Vial.obj material slots: aiStandardSurface3SG=glass, 1SG=cap, 2SG=rubber stopper
 vial_obj = meshes[0]
 bpy.context.view_layer.objects.active = vial_obj
 vial_obj.select_set(True)
 
-vial_obj.data.materials.clear()
-vial_obj.data.materials.append(mat_glass)   # slot 0
-vial_obj.data.materials.append(mat_cap)     # slot 1
+for i in range(len(vial_obj.data.materials)):
+    orig = vial_obj.data.materials[i]
+    if not orig: continue
+    name = orig.name.lower()
+    if '3sg' in name:
+        vial_obj.data.materials[i] = mat_glass
+        print(f"Slot {i}: {orig.name} → VialGlass")
+    elif '1sg' in name:
+        vial_obj.data.materials[i] = mat_cap
+        print(f"Slot {i}: {orig.name} → VialCap")
+    elif '2sg' in name:
+        vial_obj.data.materials[i] = mat_rubber
+        print(f"Slot {i}: {orig.name} → VialRubber")
 
-bpy.ops.object.mode_set(mode='EDIT')
-bm = bmesh.from_edit_mesh(vial_obj.data)
-bm.faces.ensure_lookup_table()
-
-for face in bm.faces:
-    wc = vial_obj.matrix_world @ face.calc_center_median()
-    face.material_index = 1 if wc.z > cap_z_threshold else 0
-
-bmesh.update_edit_mesh(vial_obj.data)
-bpy.ops.object.mode_set(mode='OBJECT')
-print(f"Cap/glass split at Z={cap_z_threshold:.4f}")
-
-# ── 7. Body radius — only the true cylindrical zone (10 %–55 %) ──────────────
-# Avoids the bottom flange (0-10 %) AND the shoulder start at 65 %
+# ── 7. Body radius — cylindrical zone (10 %–55 %) ────────────────────────────
 body_z_lower = vial_z_min + vial_height * 0.10
 body_z_upper = vial_z_min + vial_height * 0.55
 body_r_raw   = 0.0
@@ -160,21 +166,14 @@ for v in vial_obj.data.vertices:
     if body_z_lower < wv.z < body_z_upper:
         body_r_raw = max(body_r_raw, abs(wv.x), abs(wv.y))
 
-body_r = body_r_raw * 1.0003   # 0.03 % offset to avoid z-fighting
+body_r = body_r_raw * 1.0003
 print(f"Body radius (10-55 % zone): raw={body_r_raw:.5f}  label={body_r:.5f}")
 
 # ── 8. Label cylinder ─────────────────────────────────────────────────────────
-# Height 17 mm (was 20 mm): keeps top edge at ~56 % of vial height,
-# well below the shoulder that starts narrowing at 65 %
-VIAL_H_MM    = 36.0
-VIAL_DIAM_MM = 12.0
-LABEL_W_MM   = 45.0
-LABEL_H_MM   = 17.0
-
 label_h    = vial_height * (LABEL_H_MM / VIAL_H_MM)
-uv_scale_u = (math.pi * VIAL_DIAM_MM) / LABEL_W_MM   # 0.8378
+uv_scale_u = (math.pi * VIAL_DIAM_MM) / LABEL_W_MM   # π×14.82/45 ≈ 1.034
 
-label_bottom = vial_z_min + vial_height * (4.0 / VIAL_H_MM)   # 4 mm from base
+label_bottom = vial_z_min + vial_height * (4.0 / VIAL_H_MM)
 label_z      = label_bottom + label_h / 2
 
 print(f"Label: h={label_h:.4f}  z_center={label_z:.4f}  uv_u={uv_scale_u:.4f}")
@@ -192,18 +191,20 @@ lbl_obj.name = "VialLabelWrap"
 if not lbl_obj.data.uv_layers:
     lbl_obj.data.uv_layers.new(name="UVMap")
 
-# Label material with real gráfica texture
+# Label material — adesivo metalizado bronze (render Cycles)
 mat_lbl = bpy.data.materials.new("VialLabelMat")
 mat_lbl.use_nodes = True
 nt_l = mat_lbl.node_tree
 nl, ll = nt_l.nodes, nt_l.links
 for n in list(nl): nl.remove(n)
 
-out_l  = nl.new('ShaderNodeOutputMaterial'); out_l.location  = (700, 0)
-bsdf_l = nl.new('ShaderNodeBsdfPrincipled'); bsdf_l.location = (400, 0)
-tex_l  = nl.new('ShaderNodeTexImage');       tex_l.location  = (  0, 100)
-map_n  = nl.new('ShaderNodeMapping');        map_n.location  = (-300, 100)
-uvm_n  = nl.new('ShaderNodeUVMap');          uvm_n.location  = (-550, 100)
+out_l  = nl.new('ShaderNodeOutputMaterial'); out_l.location  = (800, 0)
+mix_n  = nl.new('ShaderNodeMixShader');      mix_n.location  = (550, 0)
+bsdf_d = nl.new('ShaderNodeBsdfPrincipled'); bsdf_d.location = (250, 120)  # diffuse label
+bsdf_m = nl.new('ShaderNodeBsdfPrincipled'); bsdf_m.location = (250, -120) # metallic bronze
+tex_l  = nl.new('ShaderNodeTexImage');       tex_l.location  = (-200, 100)
+map_n  = nl.new('ShaderNodeMapping');        map_n.location  = (-480, 100)
+uvm_n  = nl.new('ShaderNodeUVMap');          uvm_n.location  = (-720, 100)
 uvm_n.uv_map = "UVMap"
 
 map_n.inputs['Location'].default_value = (-0.10, 0.0, 0.0)
@@ -214,15 +215,22 @@ lbl_img.colorspace_settings.name = 'sRGB'
 tex_l.image     = lbl_img
 tex_l.extension = 'REPEAT'
 
-ll.new(uvm_n.outputs['UV'],     map_n.inputs['Vector'])
+# Diffuse shader (label texture)
+ll.new(uvm_n.outputs['UV'],    map_n.inputs['Vector'])
 ll.new(map_n.outputs['Vector'], tex_l.inputs['Vector'])
-ll.new(tex_l.outputs['Color'],  bsdf_l.inputs['Base Color'])
-bsdf_l.inputs['Roughness'].default_value = 0.35
-bsdf_l.inputs['Metallic'].default_value  = 0.0
-try:
-    bsdf_l.inputs['Specular IOR Level'].default_value = 0.15
-except KeyError: pass
-ll.new(bsdf_l.outputs['BSDF'], out_l.inputs['Surface'])
+ll.new(tex_l.outputs['Color'], bsdf_d.inputs['Base Color'])
+bsdf_d.inputs['Roughness'].default_value = 0.30
+
+# Metallic bronze shader
+bsdf_m.inputs['Base Color'].default_value = (0.72, 0.45, 0.20, 1)  # bronze/copper
+bsdf_m.inputs['Metallic'].default_value   = 1.0
+bsdf_m.inputs['Roughness'].default_value  = 0.08
+
+# Mix: 40% metallic bronze over diffuse (simulates hot stamp foil on dark label)
+mix_n.inputs['Fac'].default_value = 0.40
+ll.new(bsdf_d.outputs['BSDF'], mix_n.inputs[1])
+ll.new(bsdf_m.outputs['BSDF'], mix_n.inputs[2])
+ll.new(mix_n.outputs['Shader'], out_l.inputs['Surface'])
 
 lbl_obj.data.materials.append(mat_lbl)
 
@@ -234,7 +242,7 @@ bpy.ops.mesh.primitive_uv_sphere_add(
 )
 pow_obj      = bpy.context.active_object
 pow_obj.name = "VialContent"
-pow_obj.scale.z = 0.42  # flatten to oblate powder pile
+pow_obj.scale.z = 0.42
 
 mat_pow = bpy.data.materials.new("VialContent")
 mat_pow.use_nodes = True
@@ -243,17 +251,16 @@ for n in list(pnt.nodes): pnt.nodes.remove(n)
 out_p  = pnt.nodes.new('ShaderNodeOutputMaterial'); out_p.location  = (400, 0)
 bsdf_p = pnt.nodes.new('ShaderNodeBsdfPrincipled'); bsdf_p.location = (0, 0)
 pnt.links.new(bsdf_p.outputs['BSDF'], out_p.inputs['Surface'])
-bsdf_p.inputs['Base Color'].default_value = (0.02, 0.12, 0.92, 1)  # strong blue
+bsdf_p.inputs['Base Color'].default_value = (0.02, 0.12, 0.92, 1)
 bsdf_p.inputs['Roughness'].default_value  = 0.90
-bsdf_p.inputs['Metallic'].default_value   = 0.0
 try:
     bsdf_p.inputs['Emission Color'].default_value    = (0.05, 0.20, 1.00, 1)
-    bsdf_p.inputs['Emission Strength'].default_value = 0.6
+    bsdf_p.inputs['Emission Strength'].default_value = 0.8
 except KeyError: pass
 pow_obj.data.materials.append(mat_pow)
-print(f"Powder sphere: r={powder_r:.4f} at z={vial_z_min + vial_height * 0.12:.4f}")
+print(f"Powder sphere: r={powder_r:.4f}")
 
-# ── 10. World ──────────────────────────────────────────────────────────────────
+# ── 10. World ─────────────────────────────────────────────────────────────────
 world = bpy.data.worlds.new("StudioWorld")
 scene.world = world
 world.use_nodes = True
@@ -269,7 +276,7 @@ cam_o.location       = (0, -dist, 0)
 cam_o.rotation_euler = (math.radians(90), 0, 0)
 scene.camera = cam_o
 
-# ── 12. Studio lights (warm copper — no blue) ─────────────────────────────────
+# ── 12. Studio lights ─────────────────────────────────────────────────────────
 def area_light(name, energy, color, size, loc, rot_deg):
     d = bpy.data.lights.new(name, 'AREA')
     d.energy, d.color, d.size = energy, color, size
@@ -289,7 +296,7 @@ print("=== Starting render ===")
 bpy.ops.render.render(write_still=True)
 print(f"=== Render saved: {RENDER_OUT} ===")
 
-# ── 14. Export OBJ for Three.js (exclude VialContent powder sphere) ───────────
+# ── 14. Export OBJ (exclude VialContent powder sphere) ───────────────────────
 bpy.ops.object.select_all(action='DESELECT')
 for o in bpy.data.objects:
     if o.type == 'MESH' and o.name != 'VialContent':
