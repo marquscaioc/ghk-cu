@@ -2791,52 +2791,65 @@
 
     // ── Materials ─────────────────────────────────────────────────────────────
     const tl = new THREE.TextureLoader();
+    const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass body — vidro teal farmacêutico transparente (mostra pó azul interno)
+    // Glass — vidro farmacêutico teal, translúcido, mostra conteúdo interno
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:              0x082e35,   // teal farmacêutico
-      roughness:          0.04,
-      metalness:          0.0,
-      transmission:       0.62,       // vidro semi-transparente
-      thickness:          0.55,       // espessura da parede
-      ior:                1.50,
-      clearcoat:          0.95,
-      clearcoatRoughness: 0.02,
-      envMapIntensity:    0.5,
-      side:               THREE.FrontSide,
+      color:               0xffffff,   // vidro claro — tonalidade vem da atenuação
+      roughness:           0.04,
+      metalness:           0.0,
+      transmission:        0.88,
+      thickness:           0.28,
+      attenuationDistance: 1.8,
+      attenuationColor:    new THREE.Color(0.10, 0.72, 0.76),  // teal farmacêutico
+      ior:                 1.50,
+      clearcoat:           0.95,
+      clearcoatRoughness:  0.02,
+      envMapIntensity:     0.5,
+      side:                THREE.FrontSide,
     });
 
     // Cap — alumínio prateado crimp seal
     const matCap = new THREE.MeshStandardMaterial({
-      color:           0x9CA4AB,   // prata alumínio
-      roughness:       0.22,
-      metalness:       0.90,
-      envMapIntensity: 1.8,
+      color:           0xB8C2C8,
+      roughness:       0.20,
+      metalness:       0.92,
+      envMapIntensity: 2.0,
     });
 
-    // Label — real label texture + hot stamp copper foil
-    const labelTex = tl.load('/3d/label_texture.png');
-    labelTex.colorSpace = THREE.SRGBColorSpace;
-    labelTex.wrapS    = THREE.RepeatWrapping;
-    labelTex.repeat.x = 0.838;  // circumference/label_width = (π×12)/45
-    labelTex.offset.x = -0.10;
-
-    // Hot stamp metalness map: bright areas = copper foil (metallic reflection)
-    const hotStampTex = tl.load('/3d/label_hotstamp.png');
-    hotStampTex.colorSpace = THREE.SRGBColorSpace;
-    hotStampTex.wrapS    = THREE.RepeatWrapping;
-    hotStampTex.repeat.x = 0.838;
-    hotStampTex.offset.x = -0.10;
+    // Label — adesivo metalizado com hot stamp cobre
+    function loadTex(url) {
+      const t = tl.load(url);
+      t.colorSpace    = THREE.SRGBColorSpace;
+      t.wrapS         = THREE.RepeatWrapping;
+      t.repeat.x      = 0.838;
+      t.offset.x      = -0.10;
+      t.anisotropy    = maxAniso;
+      t.minFilter     = THREE.LinearMipmapLinearFilter;
+      t.magFilter     = THREE.LinearFilter;
+      return t;
+    }
+    const labelTex    = loadTex('/3d/label_texture.png');
+    const hotStampTex = loadTex('/3d/label_hotstamp.png');
 
     const matLabel = new THREE.MeshStandardMaterial({
-      map:                labelTex,
-      metalnessMap:       hotStampTex,   // cobre onde o hot stamp é branco
-      metalness:          0.95,
-      roughness:          0.15,
-      envMapIntensity:    2.5,           // reflexo cobre visível
-      polygonOffset:      true,
+      map:                 labelTex,
+      metalnessMap:        hotStampTex,
+      metalness:           0.95,
+      roughness:           0.12,
+      envMapIntensity:     3.0,
+      polygonOffset:       true,
       polygonOffsetFactor: -6,
       polygonOffsetUnits:  -6,
+    });
+
+    // Pó azul — criado programaticamente, não exportado no OBJ
+    const matPowder = new THREE.MeshStandardMaterial({
+      color:             0x1040e0,
+      emissive:          0x0a28cc,
+      emissiveIntensity: 0.80,
+      roughness:         0.92,
+      metalness:         0.0,
     });
 
     // ── Load OBJ ─────────────────────────────────────────────────────────────
@@ -2844,47 +2857,50 @@
     const loader = new OBJLoader();
     loader.load('/3d/vial_clean.obj',
       (obj) => {
+        // Bounding box antes de qualquer transformação (para detecção por Y)
+        const rawBox  = new THREE.Box3().setFromObject(obj);
+        const rawMinY = rawBox.min.y;
+        const rawH    = rawBox.max.y - rawMinY;
+
         obj.traverse(child => {
           if (!child.isMesh) return;
-          const n       = child.name.toLowerCase();
-          const pn      = (child.parent?.name || '').toLowerCase();
-          const matName = (child.material?.name || '').toLowerCase();
-          if (matName.includes('cap') || n.includes('cap') || n.includes('2sg')) {
-            child.material = matCap;
-          } else if (matName.includes('label') || n.includes('label') || pn.includes('label')) {
+          const matName = Array.isArray(child.material)
+            ? child.material.map(m => m.name || '').join(' ').toLowerCase()
+            : (child.material?.name || '').toLowerCase();
+          const n  = child.name.toLowerCase();
+          const pn = (child.parent?.name || '').toLowerCase();
+
+          if (matName.includes('label') || n.includes('label') || pn.includes('label')) {
             child.material = matLabel;
+          } else if (matName.includes('cap') || n.includes('cap')) {
+            child.material = matCap;
           } else {
-            child.material = matGlass;
+            // Fallback por posição Y: cap está no topo 25% do vial
+            const mb   = new THREE.Box3().setFromObject(child);
+            const relY = ((mb.min.y + mb.max.y) / 2 - rawMinY) / rawH;
+            child.material = relY > 0.72 ? matCap : matGlass;
           }
           child.castShadow = false;
         });
-        // Center
+
+        // Centralizar e escalar
         const box    = new THREE.Box3().setFromObject(obj);
         const center = box.getCenter(new THREE.Vector3());
         obj.position.sub(center);
-        // Scale to ~2 units tall
         const size   = box.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const sc     = 2 / maxDim;
+        const sc     = 2 / Math.max(size.x, size.y, size.z);
         obj.scale.setScalar(sc);
         scene.add(obj);
 
-        // Pó azul interno — esfera achatada no fundo do vial
-        const bodyR  = (size.x / 2) * sc;   // raio do corpo escalado
-        const vialH  = size.y * sc;           // altura total escalada (~2)
-        const matPowder = new THREE.MeshStandardMaterial({
-          color:             0x1040e0,
-          emissive:          0x0820b8,
-          emissiveIntensity: 0.55,
-          roughness:         0.92,
-          metalness:         0.0,
-        });
+        // Pó azul no fundo do vial (esfera achatada)
+        const bodyR  = (size.x / 2) * sc;
+        const vialH  = size.y * sc;
         const powder = new THREE.Mesh(
-          new THREE.SphereGeometry(bodyR * 0.80, 40, 20),
+          new THREE.SphereGeometry(bodyR * 0.78, 40, 20),
           matPowder
         );
-        powder.scale.set(1, 0.42, 1);         // achatado horizontal
-        powder.position.set(0, -vialH * 0.35, 0);  // fundo do vial
+        powder.scale.set(1, 0.40, 1);
+        powder.position.set(0, -vialH * 0.34, 0);
         scene.add(powder);
 
         vialObj = obj;

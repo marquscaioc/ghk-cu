@@ -9,7 +9,7 @@ import os
 import mathutils
 
 BASE_DIR   = r"C:\Users\Caio\Desktop\GHK CU GLOW\3d"
-VIAL_OBJ   = r"C:\Users\Caio\Downloads\base.obj"
+VIAL_OBJ   = r"C:\Users\Caio\Downloads\render_preview\base.obj"
 LABEL_TEX  = os.path.join(BASE_DIR, "label_texture.png")
 RENDER_OUT = os.path.join(BASE_DIR, "render_product.png")
 OBJ_OUT    = os.path.join(BASE_DIR, "vial_clean.obj")
