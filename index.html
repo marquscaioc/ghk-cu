@@ -2798,24 +2798,24 @@
     const matGlass = new THREE.MeshPhysicalMaterial({
       color:              0x2a8a96,
       emissive:           new THREE.Color(0.05, 0.30, 0.34),
-      emissiveIntensity:  0.70,
-      roughness:          0.12,
+      emissiveIntensity:  0.90,
+      roughness:          0.10,
       metalness:          0.0,
       transparent:        true,
       opacity:            0.88,
       depthWrite:         true,
-      clearcoat:          0.12,
-      clearcoatRoughness: 0.20,
-      envMapIntensity:    0.30,
+      clearcoat:          0.0,
+      clearcoatRoughness: 0.0,
+      envMapIntensity:    0.20,
       side:               THREE.FrontSide,
     });
 
     // Cap — alumínio prateado crimp seal
     const matCap = new THREE.MeshStandardMaterial({
-      color:           0xB8C2C8,
-      roughness:       0.20,
-      metalness:       0.92,
-      envMapIntensity: 2.0,
+      color:           0xCDD5D9,
+      roughness:       0.08,
+      metalness:       0.95,
+      envMapIntensity: 4.5,
     });
 
     // Rubber stopper — borracha branca no topo
@@ -2850,8 +2850,8 @@
       emissiveIntensity:   0.12,
       envMapIntensity:     3.5,
       polygonOffset:       true,
-      polygonOffsetFactor: -6,
-      polygonOffsetUnits:  -6,
+      polygonOffsetFactor: -10,
+      polygonOffsetUnits:  -10,
     });
 
     // placeholder — removido (interior cylinder causava faixa branca)
@@ -2897,14 +2897,19 @@
         obj.scale.setScalar(sc);
 
         // Raio do corpo em espaço LOCAL (cm), antes do scale
-        const bodyRlocal = Math.max(size.x, size.z) / 2 * 0.986;
+        const bodyRlocal = Math.max(size.x, size.z) / 2;  // raio máximo real do bounding box
 
         // Label cylinder — filho de obj em coords locais (cm)
         // centro em 11 mm do fundo: label de 2.5 mm a 19.5 mm, ~6 mm de vidro acima
+        // 324° de cobertura (gap de 36° na traseira, como rótulo farmacêutico real)
         const localLblH  = rawH * (17.0 / 30.0);
         const localLblY  = rawMinY + rawH * (11.0 / 30.0);
-        const localBodyR = bodyRlocal * 1.001;
-        const lblGeo     = new THREE.CylinderGeometry(localBodyR, localBodyR, localLblH, 256, 1, true);
+        const localBodyR = bodyRlocal * 1.006;              // 0.6% fora do glass garante label à frente
+        const lblGeo     = new THREE.CylinderGeometry(
+          localBodyR, localBodyR, localLblH, 256, 1, true,
+          Math.PI * 1.1,   // thetaStart: gap centrado em -Z (traseira)
+          Math.PI * 1.8    // thetaLength: 324° de cobertura
+        );
         const lblMesh    = new THREE.Mesh(lblGeo, matLabel);
         lblMesh.position.y = localLblY;
         obj.add(lblMesh);
