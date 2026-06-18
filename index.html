@@ -1465,7 +1465,7 @@
     }
     .buy-bar.visible { transform: translateY(0); }
     .buy-bar__info { display: flex; align-items: center; gap: 16px; justify-content: center; }
-    .buy-bar__btn { position: absolute; right: 24px; }
+    .buy-bar__btn { position: absolute; right: 24px; display: none; }
     .buy-bar__name {
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.2rem;
@@ -1748,6 +1748,42 @@
       transition: width 0.3s ease;
     }
     .nav__links a:hover::after { width: 100%; }
+
+    /* ── 3D VIEWER ── */
+    .viewer3d { padding: 100px 0 0; background: var(--bg); }
+    .viewer3d .container { text-align: center; }
+    .viewer3d__title { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 8px; }
+    .viewer3d__sub { color: var(--text-muted); font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0; }
+    .viewer3d__stage {
+      position: relative; width: 100%; height: 580px;
+      cursor: grab; margin-top: 48px;
+      background: radial-gradient(ellipse at 50% 60%, rgba(201,148,100,0.06) 0%, transparent 70%);
+    }
+    .viewer3d__stage:active { cursor: grabbing; }
+    #vialCanvas { width: 100% !important; height: 100% !important; display: block; touch-action: none; }
+    .viewer3d__loading {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+      color: var(--text-muted); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+      pointer-events: none;
+    }
+    .viewer3d__spinner {
+      width: 32px; height: 32px; border: 1.5px solid rgba(201,148,100,0.2);
+      border-top-color: var(--copper); border-radius: 50%;
+      animation: spin360 0.9s linear infinite;
+    }
+    @keyframes spin360 { to { transform: rotate(360deg); } }
+    .viewer3d__hint {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+      opacity: 1; transition: opacity 1s ease; pointer-events: none;
+    }
+    .viewer3d__hint.hidden { opacity: 0; }
+    .viewer3d__hint svg { width: 18px; height: 18px; stroke: var(--copper); }
+    @media (max-width: 768px) {
+      .viewer3d__stage { height: 420px; }
+    }
   </style>
 </head>
 <body>
@@ -2050,6 +2086,26 @@
           <div class="timeline__result">Renovação Completa</div>
           <p class="timeline__desc">Resultados plenos e acumulativos. Pele significativamente rejuvenescida, firme e com luminosidade duradoura.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3D VIEWER -->
+  <section class="viewer3d" id="viewer3d">
+    <div class="container reveal">
+      <p class="eyebrow">Visualização Interativa</p>
+      <h2 class="viewer3d__title">Veja o Vial<br><em>em Tempo Real</em></h2>
+      <p class="viewer3d__sub">Arraste para girar · Scroll para zoom</p>
+    </div>
+    <div class="viewer3d__stage">
+      <canvas id="vialCanvas"></canvas>
+      <div class="viewer3d__loading" id="vialLoading">
+        <div class="viewer3d__spinner"></div>
+        <span>Carregando modelo 3D…</span>
+      </div>
+      <div class="viewer3d__hint" id="vialHint">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12l7 7 7-7"/><circle cx="12" cy="12" r="9" opacity=".25"/></svg>
+        Arraste para girar
       </div>
     </div>
   </section>
@@ -2659,6 +2715,163 @@
       }, { threshold: 0 });
       heroObs.observe(canvas.parentElement);
     })();
+  </script>
+
+  <!-- THREE.JS 3D VIAL VIEWER -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.min.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    const canvas  = document.getElementById('vialCanvas');
+    if (!canvas) throw new Error('vialCanvas not found');
+    const stage   = canvas.parentElement;
+    const loading = document.getElementById('vialLoading');
+    const hint    = document.getElementById('vialHint');
+
+    // ── Renderer ─────────────────────────────────────────────────────────────
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.4;
+    renderer.shadowMap.enabled = false;
+
+    // ── Scene + Camera ────────────────────────────────────────────────────────
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 100);
+    camera.position.set(0, 0.3, 5);
+
+    // ── Controls ─────────────────────────────────────────────────────────────
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping    = true;
+    controls.dampingFactor    = 0.06;
+    controls.enablePan        = false;
+    controls.minDistance      = 2.5;
+    controls.maxDistance      = 9;
+    controls.minPolarAngle    = Math.PI * 0.15;
+    controls.maxPolarAngle    = Math.PI * 0.85;
+    controls.autoRotate       = true;
+    controls.autoRotateSpeed  = 1.2;
+
+    // ── Studio Lighting ───────────────────────────────────────────────────────
+    // Key — warm copper
+    const key = new THREE.DirectionalLight(0xffc878, 4);
+    key.position.set(4, 6, 4);
+    scene.add(key);
+    // Fill — cool blue
+    const fill = new THREE.DirectionalLight(0x8eb4e8, 1.2);
+    fill.position.set(-4, 2, 3);
+    scene.add(fill);
+    // Rim — warm back
+    const rim = new THREE.DirectionalLight(0xffb060, 2.5);
+    rim.position.set(0, -1, -5);
+    scene.add(rim);
+    // Bounce bottom
+    const bounce = new THREE.DirectionalLight(0xc99464, 0.8);
+    bounce.position.set(0, -4, 2);
+    scene.add(bounce);
+    // Ambient
+    scene.add(new THREE.AmbientLight(0x120e18, 6));
+
+    // ── Textures ──────────────────────────────────────────────────────────────
+    const tl = new THREE.TextureLoader();
+    function loadTex(path, srgb) {
+      const t = tl.load(path);
+      if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+      return t;
+    }
+    const tDiff   = loadTex('/3d/texture_diffuse.png',   true);
+    const tMetal  = loadTex('/3d/texture_metallic.png',  false);
+    const tRough  = loadTex('/3d/texture_roughness.png', false);
+    const tNormal = loadTex('/3d/texture_normal.png',    false);
+
+    const mat = new THREE.MeshStandardMaterial({
+      map:          tDiff,
+      metalnessMap: tMetal,
+      roughnessMap: tRough,
+      normalMap:    tNormal,
+      normalScale:  new THREE.Vector2(1, 1),
+      metalness:    1.0,
+      roughness:    1.0,
+      envMapIntensity: 1.2,
+    });
+
+    // ── Environment map ───────────────────────────────────────────────────────
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envRT = pmrem.fromScene(new RoomEnvironment());
+    scene.environment = envRT.texture;
+    pmrem.dispose();
+
+    // ── Load OBJ ─────────────────────────────────────────────────────────────
+    let vialObj = null;
+    const loader = new OBJLoader();
+    loader.load('/3d/base.obj',
+      (obj) => {
+        obj.traverse(child => {
+          if (child.isMesh) {
+            child.material = mat;
+            child.castShadow = false;
+          }
+        });
+        // Center
+        const box    = new THREE.Box3().setFromObject(obj);
+        const center = box.getCenter(new THREE.Vector3());
+        obj.position.sub(center);
+        // Scale to ~2 units tall
+        const size   = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        obj.scale.setScalar(2 / maxDim);
+        scene.add(obj);
+        vialObj = obj;
+        loading.style.display = 'none';
+      },
+      undefined,
+      (err) => {
+        loading.innerHTML = '<span style="color:#c99464">Erro ao carregar modelo.</span>';
+        console.error(err);
+      }
+    );
+
+    // ── Resize ────────────────────────────────────────────────────────────────
+    function resize() {
+      const w = stage.clientWidth;
+      const h = stage.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    new ResizeObserver(resize).observe(stage);
+
+    // ── Hint: hide after first drag ───────────────────────────────────────────
+    let hintHidden = false;
+    canvas.addEventListener('pointerdown', () => {
+      controls.autoRotate = false;
+      if (!hintHidden) { hint.classList.add('hidden'); hintHidden = true; }
+    });
+
+    // ── Render loop (only when visible) ──────────────────────────────────────
+    let rafId = null;
+    function animate() {
+      rafId = requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { if (!rafId) animate(); }
+      else { cancelAnimationFrame(rafId); rafId = null; }
+    }, { threshold: 0.1 });
+    obs.observe(stage);
   </script>
 </body>
 </html>
