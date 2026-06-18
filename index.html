@@ -2793,20 +2793,21 @@
     const tl = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass — teal semitransparente, depthWrite:true evita overlay sobre o label
+    // Glass — FrontSide elimina faces internas (fonte dos feixes azuis sobre label)
+    // emissivo alto garante teal visível acima do reflexo branco do clearcoat
     const matGlass = new THREE.MeshPhysicalMaterial({
       color:              0x2a8a96,
-      emissive:           new THREE.Color(0.04, 0.22, 0.26),
-      emissiveIntensity:  0.42,
-      roughness:          0.10,
+      emissive:           new THREE.Color(0.05, 0.30, 0.34),
+      emissiveIntensity:  0.70,
+      roughness:          0.12,
       metalness:          0.0,
       transparent:        true,
       opacity:            0.88,
       depthWrite:         true,
-      clearcoat:          0.55,
-      clearcoatRoughness: 0.06,
-      envMapIntensity:    0.40,
-      side:               THREE.DoubleSide,
+      clearcoat:          0.12,
+      clearcoatRoughness: 0.20,
+      envMapIntensity:    0.30,
+      side:               THREE.FrontSide,
     });
 
     // Cap — alumínio prateado crimp seal
