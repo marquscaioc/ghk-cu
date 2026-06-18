@@ -2793,20 +2793,19 @@
     const tl = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass — FrontSide elimina faces internas (fonte dos feixes azuis sobre label)
-    // emissivo alto garante teal visível acima do reflexo branco do clearcoat
+    // Glass — vidro farmacêutico teal: transparente com reflexo superficial (sem emissivo)
     const matGlass = new THREE.MeshPhysicalMaterial({
       color:              0x2a8a96,
-      emissive:           new THREE.Color(0.05, 0.30, 0.34),
-      emissiveIntensity:  0.90,
-      roughness:          0.10,
+      emissive:           new THREE.Color(0, 0, 0),
+      emissiveIntensity:  0,
+      roughness:          0.06,
       metalness:          0.0,
       transparent:        true,
-      opacity:            0.88,
+      opacity:            0.50,
       depthWrite:         true,
-      clearcoat:          0.0,
-      clearcoatRoughness: 0.0,
-      envMapIntensity:    0.20,
+      clearcoat:          0.40,
+      clearcoatRoughness: 0.04,
+      envMapIntensity:    0.70,
       side:               THREE.FrontSide,
     });
 
@@ -2913,6 +2912,18 @@
         const lblMesh    = new THREE.Mesh(lblGeo, matLabel);
         lblMesh.position.y = localLblY;
         obj.add(lblMesh);
+
+        // Pó azul-escuro GHK-Cu — ocupa 1/5 da cavidade interna desde a base
+        const matPowder   = new THREE.MeshStandardMaterial({
+          color: 0x080e28, roughness: 0.92, metalness: 0.0,
+        });
+        const powderH    = rawH * 0.17;                          // ~17% da altura total
+        const powderCY   = rawMinY + rawH * 0.05 + powderH * 0.5; // fundo da cavidade
+        const powderR    = bodyRlocal * 0.76;                    // dentro das paredes do vidro
+        const powderGeo  = new THREE.CylinderGeometry(powderR, powderR, powderH, 64, 1, false);
+        const powderMesh = new THREE.Mesh(powderGeo, matPowder);
+        powderMesh.position.y = powderCY;
+        obj.add(powderMesh);
 
         scene.add(obj);
         vialObj = obj;
