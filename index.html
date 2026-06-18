@@ -2783,25 +2783,28 @@
     // Ambient — pure neutral dark (no purple)
     scene.add(new THREE.AmbientLight(0x0d0d0d, 3.0));
 
-    // ── Environment map ───────────────────────────────────────────────────────
+    // ── Environment map — intensidade baixa para não criar reflexo metálico ─────
     const pmrem = new THREE.PMREMGenerator(renderer);
-    const envRT = pmrem.fromScene(new RoomEnvironment());
+    const envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
     scene.environment = envRT.texture;
     pmrem.dispose();
 
     // ── Materials ─────────────────────────────────────────────────────────────
     const tl = new THREE.TextureLoader();
 
-    // Glass body — opaque dark glass (pharmaceutical vial look)
-    // Transparent glass shows any label gap as a visible ring — dark glass hides it
+    // Glass body — vidro escuro farmacêutico com transmissão real
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:              0x0e1620,
-      roughness:          0.05,
+      color:              0x0d1a26,   // azul-escuro farmacêutico
+      roughness:          0.04,
       metalness:          0.0,
-      clearcoat:          1.0,
-      clearcoatRoughness: 0.0,
-      reflectivity:       1.0,
-      envMapIntensity:    2.0,
+      ior:                1.52,       // IOR do vidro
+      transmission:       0.55,       // semi-transparente = vidro real, não metal
+      thickness:          0.6,        // profundidade da refração
+      clearcoat:          0.7,
+      clearcoatRoughness: 0.03,
+      reflectivity:       0.35,       // reduzido — metal tem 1.0, vidro ~0.35
+      envMapIntensity:    0.5,
+      side:               THREE.DoubleSide,
     });
 
     // Cap — white rubber stopper
@@ -2809,7 +2812,7 @@
       color:           0xF4F2EF,
       roughness:       0.55,
       metalness:       0,
-      envMapIntensity: 0.4,
+      envMapIntensity: 0.3,
     });
 
     // Label — real label texture from gráfica
@@ -2823,9 +2826,9 @@
       roughness:          0.35,
       metalness:          0,
       envMapIntensity:    0.3,
-      polygonOffset:      true,   // push label in front of glass surface — no gap visible
-      polygonOffsetFactor: -1,
-      polygonOffsetUnits:  -1,
+      polygonOffset:      true,
+      polygonOffsetFactor: -6,   // offset mais agressivo — garante label na frente do vidro
+      polygonOffsetUnits:  -6,
     });
 
     // ── Load OBJ ─────────────────────────────────────────────────────────────
