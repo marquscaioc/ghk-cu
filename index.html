@@ -2728,8 +2728,8 @@
   </script>
   <script type="module">
     import * as THREE from 'three';
-    import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { OBJLoader }      from 'three/addons/loaders/OBJLoader.js';
+    import { OrbitControls }  from 'three/addons/controls/OrbitControls.js';
     import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
     const canvas  = document.getElementById('vialCanvas');
@@ -2743,7 +2743,7 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.85;
+    renderer.toneMappingExposure = 0.9;
     renderer.shadowMap.enabled = false;
 
     // ── Scene + Camera ────────────────────────────────────────────────────────
@@ -2763,48 +2763,25 @@
     controls.autoRotate       = true;
     controls.autoRotateSpeed  = 1.2;
 
-    // ── Studio Lighting ───────────────────────────────────────────────────────
-    // Key — warm copper
-    const key = new THREE.DirectionalLight(0xffc878, 1.8);
+    // ── Studio Lighting (warm copper — NO blue fill) ──────────────────────────
+    // Key — warm copper, upper right
+    const key = new THREE.DirectionalLight(0xffc878, 2.0);
     key.position.set(4, 6, 4);
     scene.add(key);
-    // Fill — cool blue
-    const fill = new THREE.DirectionalLight(0x8eb4e8, 0.6);
+    // Fill — neutral warm white (replaces the old blue fill)
+    const fill = new THREE.DirectionalLight(0xf2ede8, 0.45);
     fill.position.set(-4, 2, 3);
     scene.add(fill);
-    // Rim — warm back
-    const rim = new THREE.DirectionalLight(0xffb060, 1.0);
+    // Rim — copper backlight
+    const rim = new THREE.DirectionalLight(0xffb060, 1.1);
     rim.position.set(0, -1, -5);
     scene.add(rim);
-    // Bounce bottom
-    const bounce = new THREE.DirectionalLight(0xc99464, 0.3);
+    // Bounce — warm ground
+    const bounce = new THREE.DirectionalLight(0xd4a870, 0.25);
     bounce.position.set(0, -4, 2);
     scene.add(bounce);
-    // Ambient
-    scene.add(new THREE.AmbientLight(0x120e18, 1.5));
-
-    // ── Textures ──────────────────────────────────────────────────────────────
-    const tl = new THREE.TextureLoader();
-    function loadTex(path, srgb) {
-      const t = tl.load(path);
-      if (srgb) t.colorSpace = THREE.SRGBColorSpace;
-      return t;
-    }
-    const tDiff   = loadTex('/3d/texture_diffuse.png',   true);
-    const tMetal  = loadTex('/3d/texture_metallic.png',  false);
-    const tRough  = loadTex('/3d/texture_roughness.png', false);
-    const tNormal = loadTex('/3d/texture_normal.png',    false);
-
-    const mat = new THREE.MeshStandardMaterial({
-      map:          tDiff,
-      metalnessMap: tMetal,
-      roughnessMap: tRough,
-      normalMap:    tNormal,
-      normalScale:  new THREE.Vector2(1, 1),
-      metalness:    1.0,
-      roughness:    1.0,
-      envMapIntensity: 0.4,
-    });
+    // Ambient — pure neutral dark (no purple)
+    scene.add(new THREE.AmbientLight(0x0d0d0d, 3.0));
 
     // ── Environment map ───────────────────────────────────────────────────────
     const pmrem = new THREE.PMREMGenerator(renderer);
@@ -2812,16 +2789,59 @@
     scene.environment = envRT.texture;
     pmrem.dispose();
 
+    // ── Materials ─────────────────────────────────────────────────────────────
+    const tl = new THREE.TextureLoader();
+
+    // Glass body — Principled physical with transmission
+    const matGlass = new THREE.MeshPhysicalMaterial({
+      color:           0xddeef8,
+      transmission:    0.92,
+      roughness:       0.02,
+      metalness:       0,
+      ior:             1.47,
+      thickness:       0.6,
+      envMapIntensity: 2.0,
+      transparent:     true,
+      side:            THREE.DoubleSide,
+    });
+
+    // Cap — white rubber stopper
+    const matCap = new THREE.MeshStandardMaterial({
+      color:           0xF4F2EF,
+      roughness:       0.55,
+      metalness:       0,
+      envMapIntensity: 0.4,
+    });
+
+    // Label — real label texture from gráfica
+    const labelTex = tl.load('/3d/label_texture.png');
+    labelTex.colorSpace = THREE.SRGBColorSpace;
+    labelTex.wrapS    = THREE.RepeatWrapping;
+    labelTex.offset.x = -0.10;  // center label front (matches Blender render)
+    const matLabel = new THREE.MeshStandardMaterial({
+      map:             labelTex,
+      roughness:       0.35,
+      metalness:       0,
+      envMapIntensity: 0.3,
+    });
+
     // ── Load OBJ ─────────────────────────────────────────────────────────────
     let vialObj = null;
     const loader = new OBJLoader();
-    loader.load('/3d/base.obj',
+    loader.load('/3d/vial_clean.obj',
       (obj) => {
         obj.traverse(child => {
-          if (child.isMesh) {
-            child.material = mat;
-            child.castShadow = false;
+          if (!child.isMesh) return;
+          const n = child.name.toLowerCase();
+          const pn = (child.parent?.name || '').toLowerCase();
+          if (n.includes('cap') || n.includes('2sg')) {
+            child.material = matCap;
+          } else if (n.includes('label') || pn.includes('label')) {
+            child.material = matLabel;
+          } else {
+            child.material = matGlass;
           }
+          child.castShadow = false;
         });
         // Center
         const box    = new THREE.Box3().setFromObject(obj);
