@@ -1587,6 +1587,167 @@
       .hero__product-frame { width: 280px; height: 360px; }
       .hero__scroll { display: none; }
     }
+
+    /* ══════════════════════════════════════════════════
+       PREMIUM ANIMATIONS
+    ══════════════════════════════════════════════════ */
+
+    /* — Vial float — */
+    @keyframes vialFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33%       { transform: translateY(-10px) rotate(0.4deg); }
+      66%       { transform: translateY(-4px) rotate(-0.3deg); }
+    }
+    .hero__product-visual img {
+      animation: vialFloat 7s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    /* — Button shine sweep — */
+    @keyframes btnShine {
+      0%   { transform: translateX(-120%) skewX(-20deg); }
+      100% { transform: translateX(300%) skewX(-20deg); }
+    }
+    .btn-primary { position: relative; overflow: hidden; }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      width: 45%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      transform: translateX(-120%) skewX(-20deg);
+      pointer-events: none;
+    }
+    .btn-primary:hover::after { animation: btnShine 0.65s ease-out; }
+
+    /* — Card hover lift + copper glow — */
+    .benefit-card {
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease !important;
+    }
+    .benefit-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 56px rgba(201,148,100,0.14);
+      border-color: rgba(201,148,100,0.35) !important;
+    }
+    .forwhom-card {
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease !important;
+    }
+    .forwhom-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(201,148,100,0.12);
+      border-color: rgba(201,148,100,0.3) !important;
+    }
+    .testimonial-card {
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease !important;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(201,148,100,0.1);
+    }
+    .ingredient-card {
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease !important;
+    }
+    .ingredient-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 52px rgba(201,148,100,0.13);
+      border-color: rgba(201,148,100,0.3) !important;
+    }
+
+    /* — Stat pop when counter completes — */
+    @keyframes statPop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.1); color: var(--copper-light); }
+      100% { transform: scale(1); }
+    }
+    .stat-item__num.popped { animation: statPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+    /* — Shimmer on copper em / headings — */
+    @keyframes textShimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    .hero__title em, h2 em {
+      background: linear-gradient(90deg, var(--copper) 20%, var(--copper-light) 40%, var(--gold) 50%, var(--copper-light) 60%, var(--copper) 80%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: textShimmer 4s linear infinite;
+    }
+
+    /* — Line decorators animate in — */
+    @keyframes lineGrow {
+      from { transform: scaleX(0); opacity: 0; }
+      to   { transform: scaleX(1); opacity: 1; }
+    }
+    .reveal.visible .line::before {
+      animation: lineGrow 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
+      transform-origin: left;
+    }
+
+    /* — Stagger delays for grid children — */
+    .benefits__grid .benefit-card:nth-child(2) { animation-delay: 0.08s; }
+    .benefits__grid .benefit-card:nth-child(3) { animation-delay: 0.16s; }
+    .benefits__grid .benefit-card:nth-child(4) { animation-delay: 0.24s; }
+    .benefits__grid .benefit-card:nth-child(5) { animation-delay: 0.32s; }
+    .benefits__grid .benefit-card:nth-child(6) { animation-delay: 0.40s; }
+    .testimonials__grid .testimonial-card:nth-child(2) { animation-delay: 0.1s; }
+    .testimonials__grid .testimonial-card:nth-child(3) { animation-delay: 0.2s; }
+    .protocol__step:nth-child(2) .protocol__num { transition-delay: 0.1s; }
+    .protocol__step:nth-child(3) .protocol__num { transition-delay: 0.2s; }
+    .protocol__step:nth-child(4) .protocol__num { transition-delay: 0.3s; }
+
+    /* — Protocol step number glow on hover — */
+    @keyframes numGlow {
+      0%, 100% { box-shadow: 0 0 0px rgba(201,148,100,0); }
+      50%       { box-shadow: 0 0 20px rgba(201,148,100,0.5); }
+    }
+    .protocol__step:hover .protocol__num {
+      animation: numGlow 1.2s ease-in-out infinite;
+      border-color: rgba(201,148,100,0.6);
+    }
+
+    /* — Product card shimmer border — */
+    @keyframes borderShimmer {
+      0%, 100% { border-color: rgba(201,148,100,0.2); }
+      50%       { border-color: rgba(232,190,150,0.5); }
+    }
+    .product-card { animation: borderShimmer 4s ease-in-out infinite; }
+
+    /* — Floating dot on hero eyebrow — */
+    .hero__eyebrow-dot { animation: pulse 2s ease-in-out infinite; }
+
+    /* — Ingredient badge float — */
+    @keyframes ingredientFloat {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-5px); }
+    }
+    .ingredient-feature__badge { animation: ingredientFloat 5s ease-in-out infinite; }
+
+    /* — Trust items fade in staggered — */
+    .trust__item:nth-child(1) { animation-delay: 0s; }
+    .trust__item:nth-child(2) { animation-delay: 0.1s; }
+    .trust__item:nth-child(3) { animation-delay: 0.2s; }
+    .trust__item:nth-child(4) { animation-delay: 0.3s; }
+
+    /* — Scroll indicator pulse — */
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; transform: scaleY(1); }
+      50%       { opacity: 1;   transform: scaleY(1.3); }
+    }
+    .hero__scroll-line { animation: scrollPulse 2s ease-in-out infinite; }
+
+    /* — Nav link copper underline on hover — */
+    .nav__links a { position: relative; }
+    .nav__links a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: var(--copper);
+      transition: width 0.3s ease;
+    }
+    .nav__links a:hover::after { width: 100%; }
   </style>
 </head>
 <body>
@@ -2305,7 +2466,13 @@
         const ease = 1 - Math.pow(1 - progress, 3);
         const value = Math.floor(ease * target);
         el.textContent = value.toLocaleString('pt-BR') + suffix;
-        if (progress < 1) requestAnimationFrame(update);
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          el.textContent = target.toLocaleString('pt-BR') + suffix;
+          el.classList.add('popped');
+          setTimeout(() => el.classList.remove('popped'), 600);
+        }
       };
       requestAnimationFrame(update);
     }
