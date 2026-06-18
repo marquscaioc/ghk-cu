@@ -1142,9 +1142,12 @@
       padding-top: 32px;
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 20px;
+      text-align: center;
     }
-    .footer__disclaimer { font-size: 0.72rem; color: var(--text-muted); max-width: 700px; line-height: 1.65; }
+    .footer__disclaimer { font-size: 0.72rem; color: var(--text-muted); max-width: 680px; line-height: 1.65; }
+    .footer__copyright { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.05em; }
     .footer__legal {
       display: flex;
       align-items: center;
@@ -1578,7 +1581,7 @@
       .hero__actions { justify-content: center; }
       .trust__inner { gap: 28px; }
       .footer__inner { grid-template-columns: 1fr; gap: 40px; }
-      .footer__bottom { flex-direction: column; align-items: flex-start; }
+      .footer__bottom { flex-direction: column; align-items: center; }
       .product-card { margin: 0 16px; }
       .testimonials__grid { grid-template-columns: 1fr; }
       .hero__product-frame { width: 280px; height: 360px; }
@@ -2248,8 +2251,6 @@
           ⚗ <strong>Research Use Only:</strong> Este produto é exclusivamente para fins de pesquisa científica. Não é destinado ao diagnóstico, tratamento, cura ou prevenção de doenças, nem ao uso humano direto. As informações contidas neste site têm caráter educativo e científico. Não apoiamos o uso sem supervisão profissional habilitada.
         </p>
         <div class="footer__legal">
-          <span>© 2026 GHK·CU Glow. Todos os direitos reservados.</span>
-          <span class="footer__legal-sep">·</span>
           <a href="mailto:GHKCUGLOW@protonmail.com">GHKCUGLOW@protonmail.com</a>
           <span class="footer__legal-sep">·</span>
           <a href="/termos-de-uso">Termos de Uso</a>
@@ -2258,6 +2259,7 @@
           <span class="footer__legal-sep">·</span>
           <a href="/aviso-medico">Aviso Médico</a>
         </div>
+        <p class="footer__copyright">© 2026 GHK·CU Glow — Todos os direitos reservados.</p>
       </div>
     </div>
   </footer>
