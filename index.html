@@ -2793,20 +2793,22 @@
     const tl = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass — vidro farmacêutico teal: transparente com reflexo superficial (sem emissivo)
+    // Glass — vidro farmacêutico transparente real: transmissão física, sem tint metálico
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color:              0x2a8a96,
-      emissive:           new THREE.Color(0, 0, 0),
-      emissiveIntensity:  0,
-      roughness:          0.06,
-      metalness:          0.0,
-      transparent:        true,
-      opacity:            0.50,
-      depthWrite:         true,
-      clearcoat:          0.40,
-      clearcoatRoughness: 0.04,
-      envMapIntensity:    0.70,
-      side:               THREE.FrontSide,
+      color:               0xffffff,
+      roughness:           0.05,
+      metalness:           0.0,
+      transmission:        1.0,            // vidro de verdade — refrata o conteúdo, não é casca opaca
+      ior:                 1.5,
+      thickness:           0.45,
+      attenuationColor:    new THREE.Color(0xcfe6ea), // leve tom frio só nas bordas
+      attenuationDistance: 3.0,
+      clearcoat:           0.0,            // clearcoat criava brilho de laca → aparência metálica
+      envMapIntensity:     0.5,
+      transparent:         true,
+      opacity:             1.0,
+      depthWrite:          false,
+      side:                THREE.FrontSide,
     });
 
     // Cap — alumínio prateado crimp seal
@@ -2913,14 +2915,31 @@
         lblMesh.position.y = localLblY;
         obj.add(lblMesh);
 
-        // Pó azul-escuro GHK-Cu — ocupa 1/5 da cavidade interna desde a base
+        // Pó liofilizado GHK-Cu — bolo sólido azul, topo irregular (NÃO líquido), assentado no fundo
         const matPowder   = new THREE.MeshStandardMaterial({
-          color: 0x080e28, roughness: 0.92, metalness: 0.0,
+          color: 0x33409c, roughness: 1.0, metalness: 0.0, flatShading: true,
         });
-        const powderH    = rawH * 0.17;                          // ~17% da altura total
-        const powderCY   = rawMinY + rawH * 0.05 + powderH * 0.5; // fundo da cavidade
-        const powderR    = bodyRlocal * 0.76;                    // dentro das paredes do vidro
-        const powderGeo  = new THREE.CylinderGeometry(powderR, powderR, powderH, 64, 1, false);
+        const powderH    = rawH * 0.30;                            // bolo ocupa ~30% da altura
+        const powderR    = bodyRlocal * 0.82;                      // quase encosta nas paredes do vidro
+        const powderCY   = rawMinY + rawH * 0.035 + powderH * 0.5; // encostado no fundo (sem gap = base fina)
+        const powderGeo  = new THREE.CylinderGeometry(
+          powderR * 0.9, powderR, powderH, 96, 6, false           // fundo mais estreito acompanha o calcanhar do vidro
+        );
+        // jitter procedural → textura porosa de liofilizado, claramente sólida e não líquida
+        const pPos = powderGeo.attributes.position;
+        const pV   = new THREE.Vector3();
+        for (let i = 0; i < pPos.count; i++) {
+          pV.fromBufferAttribute(pPos, i);
+          const jitter = (Math.random() - 0.5);
+          pV.x += jitter * powderR * 0.05;
+          pV.z += jitter * powderR * 0.05;
+          if (pV.y > powderH * 0.4) {
+            // topo craquelado e levemente afundado, como bolo liofilizado que retrai
+            pV.y += (Math.random() - 0.5) * powderH * 0.16 - powderH * 0.05;
+          }
+          pPos.setXYZ(i, pV.x, pV.y, pV.z);
+        }
+        powderGeo.computeVertexNormals();
         const powderMesh = new THREE.Mesh(powderGeo, matPowder);
         powderMesh.position.y = powderCY;
         obj.add(powderMesh);
