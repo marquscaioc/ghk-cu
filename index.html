@@ -214,7 +214,7 @@
 
     /* ── RESET ──────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
     body {
       background: var(--bg);
       color: var(--text);
@@ -867,9 +867,8 @@
       }
       .testimonials__grid::-webkit-scrollbar { display: none; }
       .testimonial-card {
-        min-width: 85vw;
+        flex: 0 0 85vw;
         scroll-snap-align: start;
-        flex-shrink: 0;
       }
     }
     .testimonial-card {
@@ -1556,8 +1555,8 @@
       .hero__sub { text-align: center; }
       .hero__visual { display: flex; margin-top: 48px; }
       .hero__product-frame { width: 320px; height: 400px; }
-      .hero__badge { right: 100%; margin-right: 8px; bottom: 16px; }
-      .hero__badge2 { left: 100%; margin-left: 8px; top: 16px; }
+      .hero__badge { right: auto; left: 6px; margin-right: 0; bottom: 10px; }
+      .hero__badge2 { left: auto; right: 6px; margin-left: 0; top: 10px; }
       .benefits__grid { grid-template-columns: repeat(2,1fr); }
       .how__inner { grid-template-columns: 1fr; }
       .how__visual { display: none; }
@@ -1783,6 +1782,63 @@
     .viewer3d__hint svg { width: 18px; height: 18px; stroke: var(--copper); }
     @media (max-width: 768px) {
       .viewer3d__stage { height: 420px; }
+    }
+
+    /* ── MOBILE SWIPE CAROUSELS ──────────────────────────────────
+       Benefícios, Público e Timeline: arrastar pros lados em vez de
+       espremer todos os cards na largura da tela. Full-bleed até as
+       bordas (margem negativa cancela o padding de 24px do container). */
+    @media (max-width: 768px) {
+      .benefits__grid,
+      .forwhom__grid,
+      .timeline__track {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 16px;
+        margin: 0 -24px;
+        padding: 4px 24px 20px;
+        scroll-snap-type: x mandatory;
+        scroll-padding-left: 24px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .benefits__grid::-webkit-scrollbar,
+      .forwhom__grid::-webkit-scrollbar,
+      .timeline__track::-webkit-scrollbar { display: none; }
+
+      .benefit-card,
+      .forwhom-card,
+      .timeline__item {
+        scroll-snap-align: start;
+      }
+      /* flex-basis fixo em vw (não min-width) para o texto quebrar
+         dentro do card em vez de esticar até o max-content */
+      .benefit-card  { flex: 0 0 80vw; }
+      .forwhom-card  { flex: 0 0 78vw; }
+      .timeline__item { flex: 0 0 70vw; padding: 0; }
+
+      /* cards do carrossel sempre visíveis (o swipe é a interação;
+         o IntersectionObserver não revela cards fora da tela horizontal) */
+      .benefits__grid .reveal,
+      .forwhom__grid .reveal,
+      .timeline__track .reveal { opacity: 1; transform: none; }
+    }
+
+    /* ── MOBILE TITLE FIT ────────────────────────────────────────
+       Os clamp() tinham mínimo grande demais (hero 3rem, seções
+       2.4rem, CTA 2.8rem) e títulos longos estouravam a largura do
+       celular, sendo cortados pelo overflow-x:hidden. Reduz o piso
+       só no mobile para o texto caber inteiro. */
+    @media (max-width: 600px) {
+      .hero__title { font-size: clamp(1.85rem, 7.4vw, 2.8rem); margin-bottom: 28px; }
+      .ingredients__title,
+      .benefits__title,
+      .testimonials__title,
+      .faq__title,
+      .timeline__title,
+      .forwhom__title { font-size: clamp(1.55rem, 6.2vw, 2.4rem); }
+      .cta__title { font-size: clamp(1.85rem, 7vw, 2.8rem); }
     }
   </style>
 </head>
