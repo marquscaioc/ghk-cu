@@ -2787,6 +2787,7 @@
     import { OBJLoader }      from 'three/addons/loaders/OBJLoader.js';
     import { OrbitControls }  from 'three/addons/controls/OrbitControls.js';
     import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+    import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 
     const canvas  = document.getElementById('vialCanvas');
     if (!canvas) throw new Error('vialCanvas not found');
@@ -2819,29 +2820,42 @@
     controls.autoRotate       = true;
     controls.autoRotateSpeed  = 1.2;
 
-    // ── Studio Lighting (warm copper — NO blue fill) ──────────────────────────
-    // Key — warm copper, upper right
-    const key = new THREE.DirectionalLight(0xffc878, 2.0);
+    // ── Studio Lighting (estúdio de produto — calor de marca + reflexos limpos) ─
+    RectAreaLightUniformsLib.init();
+
+    // Key — cobre quente moderado (era 2.0; reduzido p/ prata não virar bronze)
+    const key = new THREE.DirectionalLight(0xffd9a8, 1.35);
     key.position.set(4, 6, 4);
     scene.add(key);
-    // Fill — neutral warm white (replaces the old blue fill)
-    const fill = new THREE.DirectionalLight(0xf2ede8, 0.45);
+    // Fill — branco neutro, levanta sombras sem tingir de quente
+    const fill = new THREE.DirectionalLight(0xf4f1ec, 0.55);
     fill.position.set(-4, 2, 3);
     scene.add(fill);
-    // Rim — copper backlight
-    const rim = new THREE.DirectionalLight(0xffb060, 1.1);
+    // Rim — backlight cobre p/ o glow de marca na silhueta
+    const rim = new THREE.DirectionalLight(0xffb060, 1.0);
     rim.position.set(0, -1, -5);
     scene.add(rim);
-    // Bounce — warm ground
-    const bounce = new THREE.DirectionalLight(0xd4a870, 0.25);
+    // Bounce — chão quente
+    const bounce = new THREE.DirectionalLight(0xd4a870, 0.22);
     bounce.position.set(0, -4, 2);
     scene.add(bounce);
-    // Ambient — pure neutral dark (no purple)
-    scene.add(new THREE.AmbientLight(0x0d0d0d, 3.0));
+    // Ambient — neutro escuro
+    scene.add(new THREE.AmbientLight(0x101010, 3.0));
 
-    // ── Environment map — intensidade baixa para não criar reflexo metálico ─────
+    // Softboxes neutros (RectAreaLight) — geram as listras de reflexo verticais
+    // limpas que caracterizam vidro e alumínio reais no vial.png
+    const sboxL = new THREE.RectAreaLight(0xffffff, 5.0, 1.4, 5.0);
+    sboxL.position.set(-2.6, 0.6, 3.2);
+    sboxL.lookAt(0, 0, 0);
+    scene.add(sboxL);
+    const sboxR = new THREE.RectAreaLight(0xfff4e8, 3.1, 0.9, 4.2);
+    sboxR.position.set(2.8, 0.4, 2.6);
+    sboxR.lookAt(0, 0, 0);
+    scene.add(sboxR);
+
+    // ── Environment map — reflexos nítidos de estúdio (fonte do aspecto vítreo) ──
     const pmrem = new THREE.PMREMGenerator(renderer);
-    const envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
+    const envRT = pmrem.fromScene(new RoomEnvironment(), 0.02);
     scene.environment = envRT.texture;
     pmrem.dispose();
 
@@ -2849,38 +2863,85 @@
     const tl = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // Glass — vidro farmacêutico transparente real: transmissão física, sem tint metálico
+    // Alumínio escovado procedural — listras verticais finas + grão,
+    // usado como roughnessMap (brilho cetim que "anda" ao girar) e bumpMap (micro-relevo).
+    function makeBrushedMetalTex(w = 256, h = 512) {
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#9a9a9a';                 // roughness base ~satin
+      ctx.fillRect(0, 0, w, h);
+      // grão fino
+      const img = ctx.getImageData(0, 0, w, h);
+      const d = img.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const n = (Math.random() - 0.5) * 26;
+        d[i] = d[i + 1] = d[i + 2] = Math.max(0, Math.min(255, d[i] + n));
+      }
+      ctx.putImageData(img, 0, 0);
+      // listras verticais escovadas (escuras = linhas de brilho, claras = matte)
+      for (let i = 0; i < w * 2.2; i++) {
+        const x = Math.random() * w;
+        const dark = Math.random() < 0.5;
+        const a = 0.05 + Math.random() * 0.10;
+        ctx.strokeStyle = dark ? `rgba(40,40,40,${a})` : `rgba(225,225,225,${a})`;
+        ctx.lineWidth = Math.random() * 1.6 + 0.3;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x + (Math.random() - 0.5) * 4, h);
+        ctx.stroke();
+      }
+      return cv;
+    }
+    const brushCanvas = makeBrushedMetalTex();
+    const brushRough = new THREE.CanvasTexture(brushCanvas);
+    brushRough.wrapS = brushRough.wrapT = THREE.RepeatWrapping;
+    brushRough.repeat.set(6, 1);                 // muitas voltas de escovação ao redor da tampa
+    brushRough.anisotropy = maxAniso;
+    const brushBump = new THREE.CanvasTexture(brushCanvas);
+    brushBump.wrapS = brushBump.wrapT = THREE.RepeatWrapping;
+    brushBump.repeat.set(6, 1);
+    brushBump.anisotropy = maxAniso;
+
+    // Glass — vidro farmacêutico transparente real: dielétrico puro (sem metalness),
+    // reflexos vêm do envMap nítido + softboxes; transmissão refrata o conteúdo.
     const matGlass = new THREE.MeshPhysicalMaterial({
       color:               0xffffff,
-      roughness:           0.05,
+      roughness:           0.03,            // bem polido, mas reflexo limpo (não chrome)
       metalness:           0.0,
-      transmission:        1.0,            // vidro de verdade — refrata o conteúdo, não é casca opaca
+      transmission:        1.0,            // vidro de verdade — refrata, não é casca opaca
       ior:                 1.5,
-      thickness:           0.45,
-      attenuationColor:    new THREE.Color(0xcfe6ea), // leve tom frio só nas bordas
-      attenuationDistance: 3.0,
-      clearcoat:           0.0,            // clearcoat criava brilho de laca → aparência metálica
-      envMapIntensity:     0.5,
+      thickness:           0.7,
+      attenuationColor:    new THREE.Color(0xeaf2f3), // tom frio quase imperceptível
+      attenuationDistance: 6.0,
+      specularIntensity:   1.0,            // Fresnel dielétrico completo nas quinas
+      specularColor:       new THREE.Color(0xffffff),
+      clearcoat:           0.0,            // single-interface: clearcoat só faria laca metálica
+      envMapIntensity:     1.6,            // reflexos de estúdio nítidos = aspecto vítreo
       transparent:         true,
       opacity:             1.0,
       depthWrite:          false,
       side:                THREE.FrontSide,
     });
 
-    // Cap — alumínio prateado crimp seal
+    // Cap — alumínio prateado escovado (crimp seal), com textura e reflexos vivos
     const matCap = new THREE.MeshStandardMaterial({
-      color:           0xCDD5D9,
-      roughness:       0.08,
-      metalness:       0.95,
-      envMapIntensity: 4.5,
+      color:           0xCBD1D5,
+      roughness:       0.27,               // base; modulada p/ baixo pelas listras escovadas
+      roughnessMap:    brushRough,
+      bumpMap:         brushBump,
+      bumpScale:       0.014,
+      metalness:       1.0,                // metal puro = reflexos = nítidos
+      envMapIntensity: 3.6,
     });
 
-    // Rubber stopper — borracha branca no topo
+    // Rubber/flip-top — plástico branco-creme cetim no topo
     const matRubber = new THREE.MeshStandardMaterial({
-      color:           0xDDDFE0,
-      roughness:       0.70,
+      color:           0xE4E1DA,
+      roughness:       0.42,
+      roughnessMap:    brushRough,         // micro-variação p/ não ficar chapado
       metalness:       0.0,
-      envMapIntensity: 0.4,
+      envMapIntensity: 0.9,
     });
 
     // Label — adesivo metalizado com hot stamp cobre
