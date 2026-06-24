@@ -2958,8 +2958,8 @@
       t.magFilter     = THREE.LinearFilter;
       return t;
     }
-    const labelTex    = loadTex('/3d/label_texture.png');
-    const hotStampTex = loadTex('/3d/label_hotstamp.png');
+    const labelTex    = loadTex('/3d/label_texture_wide.png');   // versão larga (3.64:1): wrap 360° sem comprimir o design
+    const hotStampTex = loadTex('/3d/label_hotstamp_wide.png');
 
     const matLabel = new THREE.MeshStandardMaterial({
       map:                 labelTex,
@@ -3054,8 +3054,8 @@
         // Label cylinder — filho de obj em coords locais (cm). CylinderGeometry é
         // CENTRADO em localLblY. Rótulo no terço médio-superior → deixa o fundo livre
         // p/ ver o pó azul GHK-Cu (relY 0–0.34) e o gargalo de vidro no topo.
-        const localLblH  = rawH * 0.37;                  // ~11 mm de altura
-        const localLblY  = rawMinY + rawH * 0.455;       // centro → base relY ~0.27, topo ~0.64 (mais centrado, ombro de vidro livre acima)
+        const localLblH  = rawH * 0.44;                  // altura cheia (proporção correta com a textura larga, não comprimido)
+        const localLblY  = rawMinY + rawH * 0.41;        // mais baixo → base relY ~0.19, topo ~0.63 (como a referência)
         const localBodyR = bodyRlocal * 1.006;              // 0.6% fora do glass garante label à frente
         const lblGeo     = new THREE.CylinderGeometry(
           localBodyR, localBodyR, localLblH, 256, 1, true,
@@ -3072,7 +3072,7 @@
           color: 0x4258e0, roughness: 1.0, metalness: 0.0, flatShading: true,
           emissive: new THREE.Color(0x2236c0), emissiveIntensity: 0.6, // leve auto-luz p/ ler azul sob luz quente
         });
-        const powderH    = rawH * 0.13;                            // bolo baixo: aro elíptico do topo (perspectiva) fica todo abaixo do rótulo (0.27)
+        const powderH    = rawH * 0.12;                            // bolo liofilizado pequeno no fundo (relY ~0.035–0.155), abaixo da base do rótulo (0.19)
         const powderR    = bodyRlocal * 0.84;                      // quase encosta nas paredes do vidro
         const powderCY   = rawMinY + rawH * 0.035 + powderH * 0.5; // encostado no fundo (sem gap = base fina)
         const powderGeo  = new THREE.CylinderGeometry(
