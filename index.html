@@ -3055,7 +3055,7 @@
         // CENTRADO em localLblY. Rótulo no terço médio-superior → deixa o fundo livre
         // p/ ver o pó azul GHK-Cu (relY 0–0.34) e o gargalo de vidro no topo.
         const localLblH  = rawH * 0.52;                  // rótulo alto (proporção casada com a textura 3.08:1)
-        const localLblY  = rawMinY + rawH * 0.40;        // base relY ~0.14, topo ~0.66 — deixa o fundo p/ o bolo de pó com textura visível
+        const localLblY  = rawMinY + rawH * 0.35;        // mais baixo → base relY ~0.09, topo ~0.61 (mais vidro livre no topo, perto da tampa)
         const localBodyR = bodyRlocal * 1.006;              // 0.6% fora do glass garante label à frente
         const lblGeo     = new THREE.CylinderGeometry(
           localBodyR, localBodyR, localLblH, 256, 1, true,
@@ -3096,7 +3096,7 @@
           roughness: 1.0, metalness: 0.0,
           emissive: new THREE.Color(0x223bcc), emissiveIntensity: 0.5, // auto-luz leve p/ ler azul sob luz quente
         });
-        const powderH    = rawH * 0.085;                           // bolo no fundo (relY ~0.035–0.12), textura visível, abaixo da base do rótulo (0.14)
+        const powderH    = rawH * 0.045;                           // bolo no fundo (relY ~0.035–0.08), abaixo da base do rótulo (0.09)
         const powderR    = bodyRlocal * 0.84;                      // quase encosta nas paredes do vidro
         const powderCY   = rawMinY + rawH * 0.035 + powderH * 0.5; // encostado no fundo (sem gap = base fina)
         const powderGeo  = new THREE.CylinderGeometry(
