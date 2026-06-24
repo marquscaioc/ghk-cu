@@ -2921,7 +2921,7 @@
       transparent:         true,
       opacity:             1.0,
       depthWrite:          false,
-      side:                THREE.DoubleSide, // refrata as duas paredes = vê-se através (vidro real)
+      side:                THREE.FrontSide,  // FrontSide: vidro transparente sem a refração da parede traseira levantar o pó sobre o rótulo
     });
 
     // Cap — alumínio prateado escovado (crimp seal), com textura e reflexos vivos
@@ -3054,8 +3054,8 @@
         // Label cylinder — filho de obj em coords locais (cm). CylinderGeometry é
         // CENTRADO em localLblY. Rótulo no terço médio-superior → deixa o fundo livre
         // p/ ver o pó azul GHK-Cu (relY 0–0.34) e o gargalo de vidro no topo.
-        const localLblH  = rawH * 0.38;                  // ~11.4 mm de altura
-        const localLblY  = rawMinY + rawH * 0.50;        // centro → base relY ~0.31, topo ~0.69 (fim do corpo cilíndrico, antes do ombro)
+        const localLblH  = rawH * 0.37;                  // ~11 mm de altura
+        const localLblY  = rawMinY + rawH * 0.455;       // centro → base relY ~0.27, topo ~0.64 (mais centrado, ombro de vidro livre acima)
         const localBodyR = bodyRlocal * 1.006;              // 0.6% fora do glass garante label à frente
         const lblGeo     = new THREE.CylinderGeometry(
           localBodyR, localBodyR, localLblH, 256, 1, true,
@@ -3072,7 +3072,7 @@
           color: 0x4258e0, roughness: 1.0, metalness: 0.0, flatShading: true,
           emissive: new THREE.Color(0x2236c0), emissiveIntensity: 0.6, // leve auto-luz p/ ler azul sob luz quente
         });
-        const powderH    = rawH * 0.22;                            // topo do bolo bem abaixo da base do rótulo (relY ~0.26 < 0.31)
+        const powderH    = rawH * 0.13;                            // bolo baixo: aro elíptico do topo (perspectiva) fica todo abaixo do rótulo (0.27)
         const powderR    = bodyRlocal * 0.84;                      // quase encosta nas paredes do vidro
         const powderCY   = rawMinY + rawH * 0.035 + powderH * 0.5; // encostado no fundo (sem gap = base fina)
         const powderGeo  = new THREE.CylinderGeometry(
