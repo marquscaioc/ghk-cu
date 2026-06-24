@@ -3023,17 +3023,18 @@
             m.castShadow = false;
             return m;
           };
-          // Perfil (raio, y) em cm no espaço do .obj. Base de metal: saia → flare →
-          // cilindro do crimp → lábio saliente → recolhe no sulco.
+          // Perfil (raio, y) em cm no espaço do .obj. Anel de alumínio ESTREITO
+          // (crimp), assenta no gargalo — fica mais fino que o botão de plástico.
           const metal = [
-            [0.490, 2.574], [0.490, 2.655], [0.648, 2.700],
-            [0.648, 2.838], [0.662, 2.850], [0.600, 2.868],
+            [0.490, 2.574], [0.490, 2.655], [0.560, 2.695],
+            [0.560, 2.845], [0.560, 2.862],
           ];
-          // Botão branco elevado: começa no sulco, sobe ligeiramente mais largo
-          // (sobrepõe o anel) e fecha num topo quase plano com borda arredondada.
+          // Botão de plástico branco MAIS LARGO que o metal: desce uma aba que
+          // sobrepõe (flip-off) o anel estreito, depois domo arredondado no topo.
           const white = [
-            [0.600, 2.868], [0.620, 2.886], [0.620, 3.012],
-            [0.598, 3.050], [0.520, 3.082], [0.330, 3.104], [0.0, 3.112],
+            [0.560, 2.862], [0.672, 2.862], [0.672, 2.884],
+            [0.672, 2.988], [0.650, 3.022], [0.560, 3.060],
+            [0.360, 3.095], [0.0, 3.112],
           ];
           capMesh.parent.add(lathe(metal, matCap));        // anel de alumínio
           capMesh.parent.add(lathe(white, matRubber));     // botão acetinado branco
@@ -3053,8 +3054,8 @@
         // Label cylinder — filho de obj em coords locais (cm). CylinderGeometry é
         // CENTRADO em localLblY. Rótulo no terço médio-superior → deixa o fundo livre
         // p/ ver o pó azul GHK-Cu (relY 0–0.34) e o gargalo de vidro no topo.
-        const localLblH  = rawH * 0.44;                  // ~13.2 mm de altura
-        const localLblY  = rawMinY + rawH * 0.56;        // centro → base relY ~0.34, topo ~0.78 (fica no corpo cilíndrico)
+        const localLblH  = rawH * 0.38;                  // ~11.4 mm de altura
+        const localLblY  = rawMinY + rawH * 0.50;        // centro → base relY ~0.31, topo ~0.69 (fim do corpo cilíndrico, antes do ombro)
         const localBodyR = bodyRlocal * 1.006;              // 0.6% fora do glass garante label à frente
         const lblGeo     = new THREE.CylinderGeometry(
           localBodyR, localBodyR, localLblH, 256, 1, true,
