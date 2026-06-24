@@ -3054,8 +3054,8 @@
         // Label cylinder — filho de obj em coords locais (cm). CylinderGeometry é
         // CENTRADO em localLblY. Rótulo no terço médio-superior → deixa o fundo livre
         // p/ ver o pó azul GHK-Cu (relY 0–0.34) e o gargalo de vidro no topo.
-        const localLblH  = rawH * 0.44;                  // altura cheia (proporção correta com a textura larga, não comprimido)
-        const localLblY  = rawMinY + rawH * 0.41;        // mais baixo → base relY ~0.19, topo ~0.63 (como a referência)
+        const localLblH  = rawH * 0.52;                  // rótulo alto (proporção casada com a textura 3.08:1)
+        const localLblY  = rawMinY + rawH * 0.40;        // base relY ~0.14, topo ~0.66 — deixa o fundo p/ o bolo de pó com textura visível
         const localBodyR = bodyRlocal * 1.006;              // 0.6% fora do glass garante label à frente
         const lblGeo     = new THREE.CylinderGeometry(
           localBodyR, localBodyR, localLblH, 256, 1, true,
@@ -3066,13 +3066,37 @@
         lblMesh.position.y = localLblY;
         obj.add(lblMesh);
 
-        // Pó liofilizado GHK-Cu — bolo sólido azul VÍVIDO (cor de cobre-peptídeo),
-        // leve emissão p/ ser visível através do vidro mesmo no escuro; topo irregular.
+        // Pó liofilizado GHK-Cu — bolo azul com textura porosa/craquelada procedural
+        const powderCanvas = (() => {
+          const s = 256, c = document.createElement('canvas'); c.width = c.height = s;
+          const x = c.getContext('2d');
+          x.fillStyle = '#3a52d4'; x.fillRect(0, 0, s, s);
+          for (let i = 0; i < 9000; i++) {            // grânulos claros/escuros = aspecto poroso
+            const px = Math.random()*s, py = Math.random()*s, r = Math.random()*2.2 + 0.4;
+            x.fillStyle = Math.random() < 0.5
+              ? `rgba(155,175,255,${Math.random()*0.5})`
+              : `rgba(12,20,86,${Math.random()*0.6})`;
+            x.beginPath(); x.arc(px, py, r, 0, 6.3); x.fill();
+          }
+          x.strokeStyle = 'rgba(8,12,58,0.6)';        // trincas finas = craquelado do liofilizado
+          for (let i = 0; i < 42; i++) {
+            x.lineWidth = Math.random()*1.4 + 0.3; x.beginPath();
+            let px = Math.random()*s, py = Math.random()*s; x.moveTo(px, py);
+            for (let k = 0; k < 6; k++) { px += (Math.random()-0.5)*46; py += (Math.random()-0.5)*46; x.lineTo(px, py); }
+            x.stroke();
+          }
+          return c;
+        })();
+        const powderTex = new THREE.CanvasTexture(powderCanvas);
+        powderTex.wrapS = powderTex.wrapT = THREE.RepeatWrapping;
+        powderTex.repeat.set(3, 2);
+        powderTex.anisotropy = maxAniso;
         const matPowder   = new THREE.MeshStandardMaterial({
-          color: 0x4258e0, roughness: 1.0, metalness: 0.0, flatShading: true,
-          emissive: new THREE.Color(0x2236c0), emissiveIntensity: 0.6, // leve auto-luz p/ ler azul sob luz quente
+          color: 0x4a62e6, map: powderTex, bumpMap: powderTex, bumpScale: 0.045,
+          roughness: 1.0, metalness: 0.0,
+          emissive: new THREE.Color(0x223bcc), emissiveIntensity: 0.5, // auto-luz leve p/ ler azul sob luz quente
         });
-        const powderH    = rawH * 0.12;                            // bolo liofilizado pequeno no fundo (relY ~0.035–0.155), abaixo da base do rótulo (0.19)
+        const powderH    = rawH * 0.085;                           // bolo no fundo (relY ~0.035–0.12), textura visível, abaixo da base do rótulo (0.14)
         const powderR    = bodyRlocal * 0.84;                      // quase encosta nas paredes do vidro
         const powderCY   = rawMinY + rawH * 0.035 + powderH * 0.5; // encostado no fundo (sem gap = base fina)
         const powderGeo  = new THREE.CylinderGeometry(
