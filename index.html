@@ -3072,8 +3072,8 @@
           color: 0x4258e0, roughness: 1.0, metalness: 0.0, flatShading: true,
           emissive: new THREE.Color(0x2236c0), emissiveIntensity: 0.6, // leve auto-luz p/ ler azul sob luz quente
         });
-        const powderH    = rawH * 0.30;                            // bolo ocupa ~30% da altura
-        const powderR    = bodyRlocal * 0.85;                      // quase encosta nas paredes do vidro
+        const powderH    = rawH * 0.22;                            // topo do bolo bem abaixo da base do rótulo (relY ~0.26 < 0.31)
+        const powderR    = bodyRlocal * 0.84;                      // quase encosta nas paredes do vidro
         const powderCY   = rawMinY + rawH * 0.035 + powderH * 0.5; // encostado no fundo (sem gap = base fina)
         const powderGeo  = new THREE.CylinderGeometry(
           powderR * 0.9, powderR, powderH, 96, 6, false           // fundo mais estreito acompanha o calcanhar do vidro
